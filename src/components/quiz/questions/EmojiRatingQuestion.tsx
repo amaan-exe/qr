@@ -34,12 +34,21 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
 
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
-      <div className="space-y-2">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          Required • 2 of 5
-        </span>
-        <h2 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">
-          How did you find the food & drinks?
+      <div className="space-y-2.5">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-300">
+            Question 2 of 5
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="text-[11px] text-slate-400">Required</span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          How did you find the{' '}
+          <span className="bg-gradient-to-r from-rose-300 via-amber-300 to-rose-200 bg-clip-text text-transparent">
+            food & drinks
+          </span>
+          ?
         </h2>
         <p className="text-sm text-slate-400">
           Taste, freshness, and presentation

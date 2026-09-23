@@ -36,12 +36,21 @@ export default function OrderedItemsQuestion({
 
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
-      <div className="space-y-2">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
-          Optional • 5 of 5
-        </span>
-        <h2 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">
-          What did you order today?
+      <div className="space-y-2.5">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-300">
+            Question 5 of 5
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="text-[11px] text-slate-400">Optional</span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          What did you{' '}
+          <span className="bg-gradient-to-r from-amber-300 via-rose-300 to-amber-200 bg-clip-text text-transparent">
+            order today
+          </span>
+          ?
         </h2>
         <p className="text-sm text-slate-400">
           Select dishes or beverages you enjoyed

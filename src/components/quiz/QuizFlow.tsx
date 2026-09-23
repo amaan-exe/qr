@@ -360,43 +360,49 @@ export default function QuizFlow({
         canGoBack={stepIndex > 0}
       />
 
-      <div className="my-auto py-6">
-        <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/85 border border-slate-800/80 backdrop-blur-2xl shadow-2xl">
-          {currentKey === 'overall_rating' && (
-            <StarRatingQuestion
-              value={answers.overall_rating}
-              onChange={(val) => handleSetAnswer('overall_rating', val, true)}
-            />
-          )}
+      <div className="my-auto py-4 sm:py-6">
+        <div className="relative p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden">
+          {/* Subtle ambient lighting behind questions */}
+          <div className="absolute -top-24 -left-24 w-52 h-52 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          {currentKey === 'food_rating' && (
-            <EmojiRatingQuestion
-              value={answers.food_rating}
-              onChange={(val) => handleSetAnswer('food_rating', val, true)}
-            />
-          )}
+          <div className="relative z-10">
+            {currentKey === 'overall_rating' && (
+              <StarRatingQuestion
+                value={answers.overall_rating}
+                onChange={(val) => handleSetAnswer('overall_rating', val, true)}
+              />
+            )}
 
-          {currentKey === 'service_rating' && (
-            <ServiceRatingQuestion
-              value={answers.service_rating}
-              onChange={(val) => handleSetAnswer('service_rating', val, true)}
-            />
-          )}
+            {currentKey === 'food_rating' && (
+              <EmojiRatingQuestion
+                value={answers.food_rating}
+                onChange={(val) => handleSetAnswer('food_rating', val, true)}
+              />
+            )}
 
-          {currentKey === 'liked' && (
-            <ComplimentsQuestion
-              value={answers.liked || []}
-              onChange={(val) => handleSetAnswer('liked', val, false)}
-            />
-          )}
+            {currentKey === 'service_rating' && (
+              <ServiceRatingQuestion
+                value={answers.service_rating}
+                onChange={(val) => handleSetAnswer('service_rating', val, true)}
+              />
+            )}
 
-          {currentKey === 'ordered' && (
-            <OrderedItemsQuestion
-              menuItems={menuItems}
-              value={answers.ordered || []}
-              onChange={(val) => handleSetAnswer('ordered', val, false)}
-            />
-          )}
+            {currentKey === 'liked' && (
+              <ComplimentsQuestion
+                value={answers.liked || []}
+                onChange={(val) => handleSetAnswer('liked', val, false)}
+              />
+            )}
+
+            {currentKey === 'ordered' && (
+              <OrderedItemsQuestion
+                menuItems={menuItems}
+                value={answers.ordered || []}
+                onChange={(val) => handleSetAnswer('ordered', val, false)}
+              />
+            )}
+          </div>
         </div>
 
         <QuizNavigationControls

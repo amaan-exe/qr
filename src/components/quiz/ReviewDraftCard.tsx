@@ -25,6 +25,7 @@ export default function ReviewDraftCard({
 }: ReviewDraftCardProps) {
   const [draft, setDraft] = useState(initialDraftText)
   const [isLoadingDraft, setIsLoadingDraft] = useState(!initialDraftText)
+  const [hasCopied, setHasCopied] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -69,17 +70,20 @@ export default function ReviewDraftCard({
     try {
       await navigator.clipboard.writeText(draft)
       setIsCopied(true)
-      setToastMessage('Copied to clipboard!')
+      setHasCopied(true)
+      setToastMessage('Review copied! You can now open Google Reviews.')
       setTimeout(() => {
         setIsCopied(false)
         setToastMessage(null)
-      }, 3000)
+      }, 3500)
     } catch {
-      setToastMessage('Could not access clipboard')
+      // Fallback if browser clipboard permission prompt or error
+      setHasCopied(true)
+      setToastMessage('Ready to post on Google!')
     }
   }
 
-  // Primary Action: Share on Google
+  // Primary Action: Share on Google (only accessible after copying)
   const handleShareOnGoogle = async () => {
     // 1. Ensure latest draft is saved
     try {
@@ -90,15 +94,9 @@ export default function ReviewDraftCard({
       })
     } catch {}
 
-    // 2. Copy draft to clipboard
+    // 2. Ensure clipboard has current draft text
     try {
       await navigator.clipboard.writeText(draft)
-      setIsCopied(true)
-      setToastMessage('Draft copied to clipboard! Paste on Google.')
-      setTimeout(() => {
-        setIsCopied(false)
-        setToastMessage(null)
-      }, 4000)
     } catch {}
 
     // 3. Track GOOGLE_CLICKED event
@@ -163,47 +161,99 @@ export default function ReviewDraftCard({
           </>
         )}
 
-        {/* Action Buttons in Canonical PRD Order */}
-        <div className="pt-2 space-y-2.5">
-          {/* 1. Primary: Share on Google */}
-          {googleReviewUrl ? (
-            <button
-              type="button"
-              onClick={handleShareOnGoogle}
-              disabled={isLoadingDraft}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 bg-[length:200%_auto] hover:bg-right hover:scale-[1.01] active:scale-[0.99] text-white font-semibold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm"
+        {/* 2-Step Copy & Redirect Action Flow */}
+        <div className="pt-2 space-y-3">
+          {/* Step indicator badges */}
+          <div className="flex items-center justify-center gap-2 text-xs py-1">
+            <span
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
+                hasCopied
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold shadow-sm'
+              }`}
             >
-              <span>Share on Google</span>
-              <ExternalLink className="w-4 h-4" />
-            </button>
+              {hasCopied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Step 1: Copied</span>
+                </>
+              ) : (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                  <span>Step 1: Copy Review</span>
+                </>
+              )}
+            </span>
+
+            <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
+
+            <span
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
+                hasCopied
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold shadow-sm animate-pulse'
+                  : 'bg-slate-800/60 text-slate-500 border border-slate-700/50'
+              }`}
+            >
+              <span>Step 2: Paste on Google</span>
+            </span>
+          </div>
+
+          {!hasCopied ? (
+            /* STEP 1: Copy Button MUST be clicked first */
+            <div className="space-y-2 animate-in fade-in duration-200">
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                disabled={isLoadingDraft}
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 bg-[length:200%_auto] hover:bg-right hover:scale-[1.01] active:scale-[0.99] text-white font-semibold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm"
+              >
+                <Copy className="w-4 h-4" />
+                <span>Copy Review Text</span>
+              </button>
+
+              <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5 py-0.5">
+                <span>📋 Tap above to copy — Google review button will unlock next.</span>
+              </p>
+            </div>
           ) : (
-            <button
-              type="button"
-              onClick={copyToClipboard}
-              className="w-full h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer text-sm"
-            >
-              <Copy className="w-4 h-4" />
-              <span>Copy Review Text</span>
-            </button>
-          )}
+            /* STEP 2: Google Review button ONLY shown after copying */
+            <div className="space-y-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {googleReviewUrl ? (
+                <button
+                  type="button"
+                  onClick={handleShareOnGoogle}
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 bg-[length:200%_auto] hover:bg-right hover:scale-[1.01] active:scale-[0.99] text-white font-semibold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm"
+                >
+                  <span>Share on Google</span>
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onDone}
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer text-sm"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Done</span>
+                </button>
+              )}
 
-          {/* Helper Notice */}
-          <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5 py-0.5">
-            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span>Text copies automatically on tap — just paste on Google!</span>
-          </p>
+              {/* Helper notice */}
+              <p className="text-[11px] text-emerald-400 text-center flex items-center justify-center gap-1.5 py-0.5 font-medium">
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>Text copied! Just paste (tap & hold or Ctrl+V) on Google.</span>
+              </p>
 
-          {/* 2. Secondary: Copy Text */}
-          {googleReviewUrl && (
-            <button
-              type="button"
-              onClick={copyToClipboard}
-              disabled={isLoadingDraft}
-              className="w-full h-10 rounded-xl bg-slate-800/70 hover:bg-slate-800 text-slate-200 border border-slate-700/60 font-medium flex items-center justify-center gap-2 cursor-pointer text-xs transition-colors"
-            >
-              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{isCopied ? 'Copied!' : 'Copy text to paste manually'}</span>
-            </button>
+              {/* Secondary button to re-copy if edited */}
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                className="w-full h-9 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-medium flex items-center justify-center gap-2 cursor-pointer text-xs transition-colors"
+              >
+                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{isCopied ? 'Copied again!' : 'Copy text again'}</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -246,3 +296,4 @@ export default function ReviewDraftCard({
     </div>
   )
 }
+

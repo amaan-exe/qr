@@ -40,12 +40,21 @@ export default function StarRatingQuestion({ value, onChange }: StarRatingQuesti
 
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
-      <div className="space-y-2">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          Required • 1 of 5
-        </span>
-        <h2 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">
-          How was your overall experience today?
+      <div className="space-y-2.5">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-300">
+            Question 1 of 5
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="text-[11px] text-slate-400">Required</span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          How was your{' '}
+          <span className="bg-gradient-to-r from-amber-300 via-rose-300 to-amber-200 bg-clip-text text-transparent">
+            overall experience
+          </span>{' '}
+          today?
         </h2>
         <p className="text-sm text-slate-400">
           Tap a star to rate your visit
