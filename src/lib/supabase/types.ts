@@ -55,6 +55,7 @@ export interface Database {
           created_at?: string
           updated_at?: string | null
         }
+        Relationships: []
       }
       campaigns: {
         Row: {
@@ -87,6 +88,15 @@ export interface Database {
           created_at?: string
           updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       menu_items: {
         Row: {
@@ -113,6 +123,15 @@ export interface Database {
           position?: number | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       questions: {
         Row: {
@@ -151,6 +170,15 @@ export interface Database {
           active?: boolean
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "questions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       sessions: {
         Row: {
@@ -195,6 +223,22 @@ export interface Database {
           ua_hash?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       answers: {
         Row: {
@@ -221,6 +265,22 @@ export interface Database {
           value?: Json
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       review_drafts: {
         Row: {
@@ -250,6 +310,15 @@ export interface Database {
           created_at?: string
           updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "review_drafts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       private_feedback: {
         Row: {
@@ -285,6 +354,22 @@ export interface Database {
           contact_consent?: boolean | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "private_feedback_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "private_feedback_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       events: {
         Row: {
@@ -320,6 +405,29 @@ export interface Database {
           timestamp?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       session_flags: {
         Row: {
@@ -343,6 +451,22 @@ export interface Database {
           reason?: string
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "session_flags_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_flags_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: Record<string, never>
@@ -357,6 +481,7 @@ export interface Database {
       }
     }
     Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 

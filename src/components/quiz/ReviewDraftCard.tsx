@@ -1,0 +1,248 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { Copy, Check, ExternalLink, MessageSquareHeart, Sparkles, Loader2, ArrowRight, RotateCcw } from 'lucide-react'
+import { trackClientEvent } from '@/lib/client/telemetry'
+
+interface ReviewDraftCardProps {
+  sessionId: string
+  slug?: string
+  restaurantName: string
+  googleReviewUrl?: string | null
+  initialDraftText?: string
+  onOpenPrivateFeedback: () => void
+  onDone: () => void
+}
+
+export default function ReviewDraftCard({
+  sessionId,
+  slug,
+  restaurantName,
+  googleReviewUrl,
+  initialDraftText = '',
+  onOpenPrivateFeedback,
+  onDone,
+}: ReviewDraftCardProps) {
+  const [draft, setDraft] = useState(initialDraftText)
+  const [isLoadingDraft, setIsLoadingDraft] = useState(!initialDraftText)
+  const [isCopied, setIsCopied] = useState(false)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Fetch draft from API if not pre-populated
+  useEffect(() => {
+    if (!draft && sessionId) {
+      setIsLoadingDraft(true)
+      fetch(`/api/public/sessions/${sessionId}/draft`, { method: 'POST' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.final_text || data?.original_text) {
+            setDraft(data.final_text || data.original_text)
+          } else {
+            setDraft('Had a great visit today! The food was delicious and the hospitality was warm and attentive.')
+          }
+        })
+        .catch((err) => {
+          console.warn('Draft load error:', err)
+          setDraft('Had a great visit today! The food was delicious and the hospitality was warm and attentive.')
+        })
+        .finally(() => setIsLoadingDraft(false))
+    }
+  }, [sessionId, draft])
+
+  // Save changes with 1s debounce
+  const handleDraftChange = (newText: string) => {
+    setDraft(newText)
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+
+    saveTimeoutRef.current = setTimeout(() => {
+      fetch(`/api/public/sessions/${sessionId}/draft`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ final_text: newText }),
+      }).catch((e) => console.warn('Draft auto-save error:', e))
+    }, 1000)
+  }
+
+  // Copy text helper
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(draft)
+      setIsCopied(true)
+      setToastMessage('Copied to clipboard!')
+      setTimeout(() => {
+        setIsCopied(false)
+        setToastMessage(null)
+      }, 3000)
+    } catch {
+      setToastMessage('Could not access clipboard')
+    }
+  }
+
+  // Primary Action: Share on Google
+  const handleShareOnGoogle = async () => {
+    // 1. Ensure latest draft is saved
+    try {
+      await fetch(`/api/public/sessions/${sessionId}/draft`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ final_text: draft }),
+      })
+    } catch {}
+
+    // 2. Copy draft to clipboard
+    try {
+      await navigator.clipboard.writeText(draft)
+      setIsCopied(true)
+      setToastMessage('Draft copied to clipboard! Paste on Google.')
+      setTimeout(() => {
+        setIsCopied(false)
+        setToastMessage(null)
+      }, 4000)
+    } catch {}
+
+    // 3. Track GOOGLE_CLICKED event
+    trackClientEvent(sessionId, 'GOOGLE_CLICKED')
+
+    // 4. Open Google review link
+    if (googleReviewUrl) {
+      window.open(googleReviewUrl, '_blank', 'noopener,noreferrer')
+    }
+
+    // 5. Advance to ThankYou
+    onDone()
+  }
+
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0
+
+  return (
+    <div className="relative z-10 w-full max-w-md mx-auto py-6 px-4 sm:px-0 space-y-5 animate-in fade-in zoom-in-95 duration-300">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900 border border-slate-700 text-white text-xs font-semibold shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Card Header & Disclaimer */}
+      <div className="text-center space-y-1.5">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>AI Assisted Review</span>
+        </div>
+        <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">
+          Your review draft
+        </h1>
+        <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+          Draft based on your answers — edit or replace it. Posting a review is optional.
+        </p>
+      </div>
+
+      {/* Editable Draft Text Area */}
+      <div className="p-5 rounded-3xl bg-slate-900/85 border border-slate-800 backdrop-blur-2xl shadow-2xl space-y-3">
+        {isLoadingDraft ? (
+          <div className="py-12 text-center text-slate-400 space-y-3">
+            <Loader2 className="w-7 h-7 mx-auto animate-spin text-rose-500" />
+            <p className="text-xs">Preparing your custom review draft...</p>
+          </div>
+        ) : (
+          <>
+            <textarea
+              value={draft}
+              onChange={(e) => handleDraftChange(e.target.value)}
+              placeholder="Write or edit your review..."
+              rows={4}
+              aria-label="Edit review draft"
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-rose-500/60 focus:ring-2 focus:ring-rose-500/20 resize-none transition-all leading-relaxed"
+            />
+            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+              <span>{wordCount} words</span>
+              <span>Tap text to edit freely</span>
+            </div>
+          </>
+        )}
+
+        {/* Action Buttons in Canonical PRD Order */}
+        <div className="pt-2 space-y-2.5">
+          {/* 1. Primary: Share on Google */}
+          {googleReviewUrl ? (
+            <button
+              type="button"
+              onClick={handleShareOnGoogle}
+              disabled={isLoadingDraft}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 bg-[length:200%_auto] hover:bg-right hover:scale-[1.01] active:scale-[0.99] text-white font-semibold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm"
+            >
+              <span>Share on Google</span>
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={copyToClipboard}
+              className="w-full h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer text-sm"
+            >
+              <Copy className="w-4 h-4" />
+              <span>Copy Review Text</span>
+            </button>
+          )}
+
+          {/* Helper Notice */}
+          <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5 py-0.5">
+            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Text copies automatically on tap — just paste on Google!</span>
+          </p>
+
+          {/* 2. Secondary: Copy Text */}
+          {googleReviewUrl && (
+            <button
+              type="button"
+              onClick={copyToClipboard}
+              disabled={isLoadingDraft}
+              className="w-full h-10 rounded-xl bg-slate-800/70 hover:bg-slate-800 text-slate-200 border border-slate-700/60 font-medium flex items-center justify-center gap-2 cursor-pointer text-xs transition-colors"
+            >
+              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{isCopied ? 'Copied!' : 'Copy text to paste manually'}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Secondary Link: Send Private Feedback */}
+      <div className="text-center pt-1 space-y-3">
+        <button
+          type="button"
+          onClick={onOpenPrivateFeedback}
+          className="inline-flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 font-medium hover:underline underline-offset-4 cursor-pointer transition-all"
+        >
+          <MessageSquareHeart className="w-3.5 h-3.5" />
+          <span>Send private feedback directly to the restaurant</span>
+        </button>
+
+        {/* 4. Tertiary: No thanks, I'm done */}
+        <div>
+          <button
+            type="button"
+            onClick={onDone}
+            className="text-xs text-slate-400 hover:text-slate-300 py-1 px-3 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors"
+          >
+            No thanks, I&apos;m done
+          </button>
+        </div>
+
+        {/* 5. Start a new review */}
+        {slug && (
+          <div className="pt-2 border-t border-slate-800/60">
+            <a
+              href={`/r/${slug}?new=1`}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Submit another review</span>
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
