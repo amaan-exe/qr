@@ -13,7 +13,7 @@ import ServiceRatingQuestion from './questions/ServiceRatingQuestion'
 import ComplimentsQuestion from './questions/ComplimentsQuestion'
 import OrderedItemsQuestion, { type MenuItemData } from './questions/OrderedItemsQuestion'
 import { trackClientEvent } from '@/lib/client/telemetry'
-import { Clock, ShieldCheck, ArrowRight, Utensils } from 'lucide-react'
+import { Clock, ShieldCheck, ArrowRight, Utensils, Loader2 } from 'lucide-react'
 
 interface QuizFlowProps {
   slug: string
@@ -85,6 +85,7 @@ export default function QuizFlow({
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isStarting, setIsStarting] = useState(false)
 
   // Save an individual answer via API
   const persistAnswer = async (sId: string, key: string, value: any) => {
@@ -123,6 +124,7 @@ export default function QuizFlow({
 
       // 1. Create or ensure session
       if (!activeSessionId) {
+        setIsStarting(true)
         const res = await fetch('/api/public/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -135,16 +137,19 @@ export default function QuizFlow({
         }
       }
 
+      // 2. Immediately transition to quiz view for instant UI responsiveness
+      setView('quiz')
+
       if (activeSessionId) {
-        // 2. Mark quiz started
-        await fetch(`/api/public/sessions/${activeSessionId}/start`, { method: 'POST' })
+        // Fire start & event asynchronously in background without blocking customer
+        fetch(`/api/public/sessions/${activeSessionId}/start`, { method: 'POST' }).catch(console.warn)
         trackClientEvent(activeSessionId, 'QUIZ_STARTED')
       }
-
-      setView('quiz')
     } catch (error) {
       console.error('Error starting quiz:', error)
       setView('quiz')
+    } finally {
+      setIsStarting(false)
     }
   }
 
@@ -259,10 +264,20 @@ export default function QuizFlow({
               <button
                 type="button"
                 onClick={handleStart}
-                className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold shadow-lg shadow-rose-500/25 group transition-all duration-200 cursor-pointer text-base active:scale-[0.98]"
+                disabled={isStarting}
+                className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold shadow-lg shadow-rose-500/25 group transition-all duration-200 cursor-pointer text-base active:scale-[0.98] disabled:opacity-80 disabled:cursor-wait"
               >
-                Start Quick Quiz
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                {isStarting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    Start Quick Quiz
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
               </button>
 
               <p className="text-[11px] text-slate-400">
