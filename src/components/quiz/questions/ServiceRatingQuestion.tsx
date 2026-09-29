@@ -1,6 +1,6 @@
 'use client'
 
-import { Frown, Meh, Smile, Heart, Crown, Check } from 'lucide-react'
+import { Frown, Meh, Smile, Heart, Crown, Check, Sparkles } from 'lucide-react'
 
 interface ServiceRatingQuestionProps {
   value: number | null
@@ -13,13 +13,12 @@ const SERVICE_OPTIONS = [
     label: 'Poor',
     desc: 'Slow, inattentive, or unhelpful',
     icon: Frown,
-    activeBorder: 'border-rose-500/80',
-    activeBg: 'bg-rose-500/15',
-    activeGlow: 'shadow-[0_0_20px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/50',
-    badgeActive: 'bg-rose-500 text-white shadow-md shadow-rose-500/30',
-    badgeInactive: 'bg-rose-500/10 text-rose-400 border border-rose-500/20 group-hover:bg-rose-500/20',
-    labelActive: 'text-rose-200',
-    labelInactive: 'text-slate-200 group-hover:text-white',
+    activeBorder: 'border-rose-400',
+    activeBg: 'bg-rose-50',
+    badgeActive: 'bg-rose-600 text-white shadow-xs',
+    badgeInactive: 'bg-rose-50 text-rose-700 border border-rose-200',
+    labelActive: 'text-rose-950 font-bold',
+    labelInactive: 'text-stone-800',
     indicatorActive: 'border-rose-500 bg-rose-500 text-white',
   },
   {
@@ -27,56 +26,52 @@ const SERVICE_OPTIONS = [
     label: 'Fair',
     desc: 'Could be friendlier or faster',
     icon: Meh,
-    activeBorder: 'border-amber-500/80',
-    activeBg: 'bg-amber-500/15',
-    activeGlow: 'shadow-[0_0_20px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/50',
-    badgeActive: 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30',
-    badgeInactive: 'bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:bg-amber-500/20',
-    labelActive: 'text-amber-200',
-    labelInactive: 'text-slate-200 group-hover:text-white',
-    indicatorActive: 'border-amber-500 bg-amber-500 text-slate-950',
+    activeBorder: 'border-amber-400',
+    activeBg: 'bg-amber-50',
+    badgeActive: 'bg-amber-600 text-white shadow-xs',
+    badgeInactive: 'bg-amber-50 text-amber-800 border border-amber-200',
+    labelActive: 'text-amber-950 font-bold',
+    labelInactive: 'text-stone-800',
+    indicatorActive: 'border-amber-500 bg-amber-500 text-white',
   },
   {
     rating: 3,
     label: 'Good',
     desc: 'Attentive & met expectations',
     icon: Smile,
-    activeBorder: 'border-sky-500/80',
-    activeBg: 'bg-sky-500/15',
-    activeGlow: 'shadow-[0_0_20px_rgba(14,165,233,0.15)] ring-1 ring-sky-500/50',
-    badgeActive: 'bg-sky-500 text-white shadow-md shadow-sky-500/30',
-    badgeInactive: 'bg-sky-500/10 text-sky-400 border border-sky-500/20 group-hover:bg-sky-500/20',
-    labelActive: 'text-sky-200',
-    labelInactive: 'text-slate-200 group-hover:text-white',
-    indicatorActive: 'border-sky-500 bg-sky-500 text-white',
+    activeBorder: 'border-stone-400',
+    activeBg: 'bg-stone-100',
+    badgeActive: 'bg-stone-700 text-white shadow-xs',
+    badgeInactive: 'bg-stone-100 text-stone-700 border border-stone-200',
+    labelActive: 'text-stone-900 font-bold',
+    labelInactive: 'text-stone-800',
+    indicatorActive: 'border-stone-700 bg-stone-700 text-white',
   },
   {
     rating: 4,
     label: 'Very Good',
     desc: 'Warm, attentive, and helpful',
     icon: Heart,
-    activeBorder: 'border-emerald-500/80',
-    activeBg: 'bg-emerald-500/15',
-    activeGlow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/50',
-    badgeActive: 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30',
-    badgeInactive: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:bg-emerald-500/20',
-    labelActive: 'text-emerald-200',
-    labelInactive: 'text-slate-200 group-hover:text-white',
-    indicatorActive: 'border-emerald-500 bg-emerald-500 text-white',
+    activeBorder: 'border-emerald-400',
+    activeBg: 'bg-emerald-50',
+    badgeActive: 'bg-emerald-600 text-white shadow-xs',
+    badgeInactive: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+    labelActive: 'text-emerald-950 font-bold',
+    labelInactive: 'text-stone-800',
+    indicatorActive: 'border-emerald-600 bg-emerald-600 text-white',
   },
   {
     rating: 5,
-    label: 'Excellent',
-    desc: 'Outstanding hospitality & care',
+    label: 'Royal & Excellent',
+    desc: 'Outstanding Mughlai hospitality & care',
     icon: Crown,
-    activeBorder: 'border-amber-400',
-    activeBg: 'bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/10',
-    activeGlow: 'shadow-[0_0_25px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/60',
-    badgeActive: 'bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-bold shadow-md shadow-amber-400/40',
-    badgeInactive: 'bg-amber-400/10 text-amber-300 border border-amber-400/25 group-hover:bg-amber-400/20',
-    labelActive: 'text-amber-200 font-bold',
-    labelInactive: 'text-slate-200 group-hover:text-white',
-    indicatorActive: 'border-amber-400 bg-amber-400 text-slate-950',
+    activeBorder: 'border-amber-500',
+    activeBg: 'bg-gradient-to-r from-amber-50 via-amber-100/40 to-amber-50',
+    badgeActive: 'bg-gradient-to-tr from-amber-600 to-yellow-600 text-white font-bold shadow-md shadow-amber-500/20',
+    badgeInactive: 'bg-amber-50 text-amber-900 border border-amber-200',
+    labelActive: 'text-amber-950 font-bold',
+    labelInactive: 'text-stone-800',
+    indicatorActive: 'border-amber-600 bg-amber-600 text-white',
   },
 ]
 
@@ -102,36 +97,35 @@ export default function ServiceRatingQuestion({ value, onChange }: ServiceRating
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
       <div className="space-y-2.5">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-300">
-            Question 3 of 5
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-900">
+            Question 3 of 6
           </span>
-          <span className="text-slate-600">•</span>
-          <span className="text-[11px] text-slate-400">Required</span>
+          <span className="text-stone-300">•</span>
+          <span className="text-[11px] text-amber-800 font-medium">Required</span>
         </div>
-
-        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
           How was the{' '}
-          <span className="bg-gradient-to-r from-amber-300 via-rose-300 to-amber-200 bg-clip-text text-transparent">
-            hospitality & service
+          <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
+            hospitality &amp; service
           </span>
           ?
         </h2>
-        <p className="text-sm text-slate-400 max-w-sm mx-auto">
-          Staff attentiveness, friendliness, and speed of service
+        <p className="text-sm text-stone-600">
+          Staff friendliness, attentiveness, and order speed
         </p>
       </div>
 
-      {/* 5 Polished Service Option Cards */}
+      {/* Vertical List of 5 Service Options */}
       <div
         role="radiogroup"
         aria-label="Service and hospitality rating"
-        className="py-1 space-y-2.5 max-w-md mx-auto text-left"
+        className="py-2 space-y-2.5 max-w-md mx-auto text-left"
       >
         {SERVICE_OPTIONS.map((opt) => {
-          const isSelected = value === opt.rating
           const Icon = opt.icon
+          const isSelected = value === opt.rating
 
           return (
             <button
@@ -142,57 +136,36 @@ export default function ServiceRatingQuestion({ value, onChange }: ServiceRating
               tabIndex={isSelected || (!value && opt.rating === 1) ? 0 : -1}
               onClick={() => onChange(opt.rating)}
               onKeyDown={(e) => handleKeyDown(e, opt.rating)}
-              aria-label={`${opt.label} (${opt.rating} of 5): ${opt.desc}`}
-              className={`group relative w-full p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-[0.985] text-left flex items-center justify-between ${
+              aria-label={`${opt.label}: ${opt.desc}`}
+              className={`group w-full p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 flex items-center justify-between shadow-xs ${
                 isSelected
-                  ? `${opt.activeBorder} ${opt.activeBg} ${opt.activeGlow} scale-[1.01]`
-                  : 'border-slate-800/80 bg-slate-900/60 hover:bg-slate-850/90 hover:border-slate-700/80 hover:shadow-md'
+                  ? `${opt.activeBorder} ${opt.activeBg} shadow-md`
+                  : 'border-stone-200 bg-stone-50/60 hover:bg-white hover:border-amber-300'
               }`}
             >
               <div className="flex items-center gap-3.5">
-                {/* Expressive Icon Badge */}
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 ${
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                     isSelected ? opt.badgeActive : opt.badgeInactive
                   }`}
                 >
-                  <Icon className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  <Icon className="w-5 h-5" />
                 </div>
-
-                {/* Content */}
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3
-                      className={`text-sm sm:text-base font-semibold tracking-tight transition-colors ${
-                        isSelected ? opt.labelActive : opt.labelInactive
-                      }`}
-                    >
-                      {opt.label}
-                    </h3>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium transition-colors ${
-                        isSelected
-                          ? 'bg-white/15 text-white/90 font-bold'
-                          : 'bg-slate-800/90 text-slate-400 group-hover:text-slate-300'
-                      }`}
-                    >
-                      {opt.rating}/5
-                    </span>
+                  <div className={`text-sm font-semibold ${isSelected ? opt.labelActive : opt.labelInactive}`}>
+                    {opt.label}
                   </div>
-                  <p className="text-xs text-slate-400 leading-snug mt-0.5 group-hover:text-slate-300 transition-colors">
-                    {opt.desc}
-                  </p>
+                  <div className="text-[11px] text-stone-500">{opt.desc}</div>
                 </div>
               </div>
 
               {/* Radio Indicator */}
               <div
-                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200 shrink-0 ml-3 ${
+                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
                   isSelected
-                    ? `${opt.indicatorActive} shadow-sm scale-110`
-                    : 'border-slate-700/80 bg-slate-800/40 group-hover:border-slate-600'
+                    ? opt.indicatorActive
+                    : 'border-stone-300 bg-white group-hover:border-stone-400'
                 }`}
-                aria-hidden="true"
               >
                 {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
               </div>

@@ -1,16 +1,18 @@
 'use client'
 
+import { Sparkles } from 'lucide-react'
+
 interface EmojiRatingQuestionProps {
   value: number | null
   onChange: (value: number) => void
 }
 
 const EMOJI_OPTIONS = [
-  { rating: 1, emoji: '😞', label: 'Bad', color: 'hover:border-rose-500/50 group-hover:text-rose-400' },
-  { rating: 2, emoji: '😕', label: 'Fair', color: 'hover:border-amber-500/50 group-hover:text-amber-400' },
-  { rating: 3, emoji: '😐', label: 'Okay', color: 'hover:border-yellow-500/50 group-hover:text-yellow-400' },
-  { rating: 4, emoji: '🙂', label: 'Good', color: 'hover:border-emerald-500/50 group-hover:text-emerald-400' },
-  { rating: 5, emoji: '😍', label: 'Amazing!', color: 'hover:border-emerald-400 group-hover:text-emerald-300' },
+  { rating: 1, emoji: '😞', label: 'Bad' },
+  { rating: 2, emoji: '😕', label: 'Fair' },
+  { rating: 3, emoji: '😐', label: 'Okay' },
+  { rating: 4, emoji: '🙂', label: 'Good' },
+  { rating: 5, emoji: '😍', label: 'Amazing!' },
 ]
 
 export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQuestionProps) {
@@ -35,23 +37,23 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
       <div className="space-y-2.5">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-300">
-            Question 2 of 5
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-900">
+            Question 2 of 6
           </span>
-          <span className="text-slate-600">•</span>
-          <span className="text-[11px] text-slate-400">Required</span>
+          <span className="text-stone-300">•</span>
+          <span className="text-[11px] text-amber-800 font-medium">Required</span>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
           How did you find the{' '}
-          <span className="bg-gradient-to-r from-rose-300 via-amber-300 to-rose-200 bg-clip-text text-transparent">
-            food & drinks
+          <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
+            food &amp; biryani
           </span>
           ?
         </h2>
-        <p className="text-sm text-slate-400">
-          Taste, freshness, and presentation
+        <p className="text-sm text-stone-600">
+          Taste, aroma, spices, and tenderness
         </p>
       </div>
 
@@ -74,10 +76,10 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
               onClick={() => onChange(opt.rating)}
               onKeyDown={(e) => handleKeyDown(e, opt.rating)}
               aria-label={`${opt.label} (${opt.rating} of 5)`}
-              className={`group flex flex-col items-center justify-center w-16 h-22 sm:w-18 sm:h-24 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
+              className={`group flex flex-col items-center justify-center w-16 h-22 sm:w-18 sm:h-24 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                 isSelected
-                  ? 'border-rose-500 bg-rose-500/15 scale-110 shadow-lg shadow-rose-500/25 ring-2 ring-rose-500/50'
-                  : 'border-slate-800 bg-slate-900/60 hover:bg-slate-800/80 hover:border-slate-700'
+                  ? 'border-amber-500 bg-amber-50 scale-110 shadow-lg shadow-amber-500/15 ring-2 ring-amber-500/40'
+                  : 'border-stone-200 bg-stone-50/60 hover:bg-white hover:border-amber-300'
               }`}
             >
               <span className="text-3xl sm:text-4xl transition-transform group-hover:scale-115 group-active:scale-95 duration-200" aria-hidden="true">
@@ -85,7 +87,7 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
               </span>
               <span
                 className={`text-xs font-semibold mt-2 transition-colors ${
-                  isSelected ? 'text-rose-400 font-bold' : 'text-slate-400 group-hover:text-slate-200'
+                  isSelected ? 'text-amber-900 font-bold' : 'text-stone-500 group-hover:text-stone-800'
                 }`}
               >
                 {opt.label}
@@ -97,11 +99,11 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
 
       <div className="h-6" aria-live="polite">
         {value ? (
-          <p className="text-sm font-semibold text-rose-300 animate-in fade-in duration-200">
+          <p className="text-sm font-semibold text-amber-800 animate-in fade-in duration-200">
             {EMOJI_OPTIONS.find((o) => o.rating === value)?.label}
           </p>
         ) : (
-          <p className="text-xs text-slate-400">Select how satisfied you were</p>
+          <p className="text-xs text-stone-500">Select how satisfied you were</p>
         )}
       </div>
     </div>

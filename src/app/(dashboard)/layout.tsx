@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Sparkles, LayoutDashboard, QrCode, MessageSquare, Utensils, Settings, LogOut } from 'lucide-react'
+import { Sparkles, LayoutDashboard, QrCode, MessageSquare, Utensils, Settings, LogOut, Users } from 'lucide-react'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -21,50 +21,60 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-rose-500 selection:text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-amber-500 selection:text-white">
       {/* Top Navigation */}
       <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-bold shadow-md shadow-rose-500/20 group-hover:scale-105 transition-transform">
-                RP
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-500 flex items-center justify-center text-white font-extrabold shadow-md shadow-amber-600/20 group-hover:scale-105 transition-transform border border-amber-400/30">
+                BC
               </div>
-              <span className="font-bold text-lg text-white tracking-tight">ReviewPulse</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-base text-white tracking-tight leading-tight">Biryani Charminar</span>
+                <span className="text-[10px] text-amber-400 font-semibold leading-none">ReviewPulse Portal</span>
+              </div>
             </Link>
 
             <nav className="hidden md:flex items-center gap-1 text-sm">
               <Link
                 href="/dashboard?tab=overview"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
               >
-                <LayoutDashboard className="w-4 h-4 text-rose-400" />
+                <LayoutDashboard className="w-4 h-4 text-amber-400" />
                 Overview
               </Link>
               <Link
-                href="/dashboard?tab=campaigns"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
+                href="/dashboard?tab=customers"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
               >
-                <QrCode className="w-4 h-4 text-amber-400" />
+                <Users className="w-4 h-4 text-teal-400" />
+                Customers
+              </Link>
+              <Link
+                href="/dashboard?tab=responses"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
+              >
+                <MessageSquare className="w-4 h-4 text-amber-400" />
+                Responses
+              </Link>
+              <Link
+                href="/dashboard?tab=campaigns"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
+              >
+                <QrCode className="w-4 h-4 text-rose-400" />
                 Campaigns
               </Link>
               <Link
-                href="/dashboard?tab=feedback"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
-              >
-                <MessageSquare className="w-4 h-4 text-rose-400" />
-                Feedback
-              </Link>
-              <Link
                 href="/dashboard?tab=menu"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
               >
                 <Utensils className="w-4 h-4 text-emerald-400" />
                 Menu
               </Link>
               <Link
                 href="/dashboard?tab=settings"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 font-medium transition-colors"
               >
                 <Settings className="w-4 h-4 text-slate-400" />
                 Settings
@@ -74,11 +84,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-xs font-medium text-slate-300 truncate max-w-[200px]">
+              <span className="text-xs font-semibold text-slate-200 truncate max-w-[200px]">
                 {user.email}
               </span>
-              <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" /> Restaurant Owner
+              <span className="text-[11px] text-amber-400 font-medium flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400" /> Biryani Charminar Owner
               </span>
             </div>
 

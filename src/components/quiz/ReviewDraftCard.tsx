@@ -40,12 +40,12 @@ export default function ReviewDraftCard({
           if (data?.final_text || data?.original_text) {
             setDraft(data.final_text || data.original_text)
           } else {
-            setDraft('Had a great visit today! The food was delicious and the hospitality was warm and attentive.')
+            setDraft('Had a wonderful dining experience at Biryani Charminar today! The authentic Hyderabadi Dum Biryani was richly spiced and aromatic, and the hospitality was exceptionally warm.')
           }
         })
         .catch((err) => {
           console.warn('Draft load error:', err)
-          setDraft('Had a great visit today! The food was delicious and the hospitality was warm and attentive.')
+          setDraft('Had a wonderful dining experience at Biryani Charminar today! The authentic Hyderabadi Dum Biryani was richly spiced and aromatic, and the hospitality was exceptionally warm.')
         })
         .finally(() => setIsLoadingDraft(false))
     }
@@ -71,13 +71,12 @@ export default function ReviewDraftCard({
       await navigator.clipboard.writeText(draft)
       setIsCopied(true)
       setHasCopied(true)
-      setToastMessage('Review copied! You can now open Google Reviews.')
+      setToastMessage('Review copied! You can now post on Google.')
       setTimeout(() => {
         setIsCopied(false)
         setToastMessage(null)
       }, 3500)
     } catch {
-      // Fallback if browser clipboard permission prompt or error
       setHasCopied(true)
       setToastMessage('Ready to post on Google!')
     }
@@ -85,7 +84,6 @@ export default function ReviewDraftCard({
 
   // Primary Action: Share on Google (only accessible after copying)
   const handleShareOnGoogle = async () => {
-    // 1. Ensure latest draft is saved
     try {
       await fetch(`/api/public/sessions/${sessionId}/draft`, {
         method: 'PATCH',
@@ -94,20 +92,16 @@ export default function ReviewDraftCard({
       })
     } catch {}
 
-    // 2. Ensure clipboard has current draft text
     try {
       await navigator.clipboard.writeText(draft)
     } catch {}
 
-    // 3. Track GOOGLE_CLICKED event
     trackClientEvent(sessionId, 'GOOGLE_CLICKED')
 
-    // 4. Open Google review link
     if (googleReviewUrl) {
       window.open(googleReviewUrl, '_blank', 'noopener,noreferrer')
     }
 
-    // 5. Advance to ThankYou
     onDone()
   }
 
@@ -117,7 +111,7 @@ export default function ReviewDraftCard({
     <div className="relative z-10 w-full max-w-md mx-auto py-6 px-4 sm:px-0 space-y-5 animate-in fade-in zoom-in-95 duration-300">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-slate-900 border border-slate-700 text-white text-xs font-semibold shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-stone-900 border border-stone-800 text-white text-xs font-semibold shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <Check className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
@@ -125,73 +119,80 @@ export default function ReviewDraftCard({
 
       {/* Card Header & Disclaimer */}
       <div className="text-center space-y-1.5">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>AI Assisted Review</span>
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-semibold shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          <span>AI Assisted Review Draft</span>
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">
-          Your review draft
+        <h1 className="text-2xl font-bold text-stone-900 tracking-tight sm:text-3xl">
+          Your Dining Review
         </h1>
-        <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-          Draft based on your answers — edit or replace it. Posting a review is optional.
+        <p className="text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
+          Crafted based on your ratings &amp; selected dishes. Feel free to tweak it before sharing.
         </p>
       </div>
 
-      {/* Editable Draft Text Area */}
-      <div className="p-5 rounded-3xl bg-slate-900/85 border border-slate-800 backdrop-blur-2xl shadow-2xl space-y-3">
+      {/* Editable Draft Text Area Card */}
+      <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-[0_20px_50px_-10px_rgba(180,83,9,0.08),0_4px_16px_rgba(0,0,0,0.03)] space-y-4">
         {isLoadingDraft ? (
-          <div className="py-12 text-center text-slate-400 space-y-3">
-            <Loader2 className="w-7 h-7 mx-auto animate-spin text-rose-500" />
-            <p className="text-xs">Preparing your custom review draft...</p>
+          <div className="py-12 text-center text-stone-500 space-y-3">
+            <Loader2 className="w-7 h-7 mx-auto animate-spin text-amber-600" />
+            <p className="text-xs font-medium">Preparing your custom review draft...</p>
           </div>
         ) : (
           <>
-            <textarea
-              value={draft}
-              onChange={(e) => handleDraftChange(e.target.value)}
-              placeholder="Write or edit your review..."
-              rows={4}
-              aria-label="Edit review draft"
-              className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-rose-500/60 focus:ring-2 focus:ring-rose-500/20 resize-none transition-all leading-relaxed"
-            />
-            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-              <span>{wordCount} words</span>
-              <span>Tap text to edit freely</span>
+            <div className="space-y-1.5">
+              <label htmlFor="review-draft-text" className="text-xs font-semibold text-stone-700 flex items-center justify-between">
+                <span>Review Draft</span>
+                <span className="text-[11px] text-amber-800 font-medium">Tap text to edit freely</span>
+              </label>
+              <textarea
+                id="review-draft-text"
+                value={draft}
+                onChange={(e) => handleDraftChange(e.target.value)}
+                placeholder="Write or edit your review..."
+                rows={4}
+                aria-label="Edit review draft"
+                className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-4 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 resize-none transition-all leading-relaxed shadow-xs"
+              />
+              <div className="flex items-center justify-between text-[11px] text-stone-400 px-1">
+                <span>{wordCount} words</span>
+                <span>Optional public review</span>
+              </div>
             </div>
           </>
         )}
 
         {/* 2-Step Copy & Redirect Action Flow */}
-        <div className="pt-2 space-y-3">
+        <div className="pt-2 space-y-3 border-t border-stone-100">
           {/* Step indicator badges */}
           <div className="flex items-center justify-center gap-2 text-xs py-1">
             <span
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${
                 hasCopied
-                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                  : 'bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold shadow-sm'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                  : 'bg-amber-100/70 text-amber-900 border border-amber-300 shadow-xs'
               }`}
             >
               {hasCopied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Step 1: Copied</span>
                 </>
               ) : (
                 <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
                   <span>Step 1: Copy Review</span>
                 </>
               )}
             </span>
 
-            <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
+            <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
 
             <span
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${
                 hasCopied
-                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold shadow-sm animate-pulse'
-                  : 'bg-slate-800/60 text-slate-500 border border-slate-700/50'
+                  ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25 animate-pulse'
+                  : 'bg-stone-100 text-stone-400 border border-stone-200'
               }`}
             >
               <span>Step 2: Paste on Google</span>
@@ -205,14 +206,14 @@ export default function ReviewDraftCard({
                 type="button"
                 onClick={copyToClipboard}
                 disabled={isLoadingDraft}
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 bg-[length:200%_auto] hover:bg-right hover:scale-[1.01] active:scale-[0.99] text-white font-semibold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm"
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-700 hover:to-amber-700 active:scale-[0.99] text-white font-bold shadow-lg shadow-amber-600/25 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer text-sm"
               >
                 <Copy className="w-4 h-4" />
                 <span>Copy Review Text</span>
               </button>
 
-              <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5 py-0.5">
-                <span>📋 Tap above to copy — Google review button will unlock next.</span>
+              <p className="text-[11px] text-stone-500 text-center flex items-center justify-center gap-1.5 py-0.5">
+                <span>📋 Tap button above to copy — Google review button will unlock next.</span>
               </p>
             </div>
           ) : (
@@ -222,16 +223,16 @@ export default function ReviewDraftCard({
                 <button
                   type="button"
                   onClick={handleShareOnGoogle}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 bg-[length:200%_auto] hover:bg-right hover:scale-[1.01] active:scale-[0.99] text-white font-semibold shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 hover:from-amber-700 hover:to-amber-700 active:scale-[0.99] text-white font-bold shadow-lg shadow-amber-600/25 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer text-sm"
                 >
-                  <span>Share on Google</span>
+                  <span>Share on Google Reviews</span>
                   <ExternalLink className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={onDone}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer text-sm"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer text-sm"
                 >
                   <Check className="w-4 h-4" />
                   <span>Done</span>
@@ -239,18 +240,18 @@ export default function ReviewDraftCard({
               )}
 
               {/* Helper notice */}
-              <p className="text-[11px] text-emerald-400 text-center flex items-center justify-center gap-1.5 py-0.5 font-medium">
+              <p className="text-[11px] text-emerald-700 text-center flex items-center justify-center gap-1.5 py-0.5 font-medium">
                 <Check className="w-3.5 h-3.5 shrink-0" />
-                <span>Text copied! Just paste (tap & hold or Ctrl+V) on Google.</span>
+                <span>Text copied! Simply paste (tap &amp; hold or Ctrl+V) on Google Reviews.</span>
               </p>
 
               {/* Secondary button to re-copy if edited */}
               <button
                 type="button"
                 onClick={copyToClipboard}
-                className="w-full h-9 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 border border-slate-700/60 font-medium flex items-center justify-center gap-2 cursor-pointer text-xs transition-colors"
+                className="w-full h-9 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 font-semibold flex items-center justify-center gap-2 cursor-pointer text-xs transition-colors"
               >
-                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{isCopied ? 'Copied again!' : 'Copy text again'}</span>
               </button>
             </div>
@@ -258,34 +259,32 @@ export default function ReviewDraftCard({
         </div>
       </div>
 
-      {/* 3. Secondary Link: Send Private Feedback */}
+      {/* Secondary Actions */}
       <div className="text-center pt-1 space-y-3">
         <button
           type="button"
           onClick={onOpenPrivateFeedback}
-          className="inline-flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 font-medium hover:underline underline-offset-4 cursor-pointer transition-all"
+          className="inline-flex items-center gap-1.5 text-xs text-amber-800 hover:text-amber-900 font-semibold hover:underline underline-offset-4 cursor-pointer transition-all"
         >
-          <MessageSquareHeart className="w-3.5 h-3.5" />
-          <span>Send private feedback directly to the restaurant</span>
+          <MessageSquareHeart className="w-3.5 h-3.5 text-amber-600" />
+          <span>Send private feedback directly to the restaurant manager</span>
         </button>
 
-        {/* 4. Tertiary: No thanks, I'm done */}
         <div>
           <button
             type="button"
             onClick={onDone}
-            className="text-xs text-slate-400 hover:text-slate-300 py-1 px-3 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors"
+            className="text-xs text-stone-500 hover:text-stone-800 py-1 px-3 rounded-lg hover:bg-stone-100 cursor-pointer transition-colors"
           >
             No thanks, I&apos;m done
           </button>
         </div>
 
-        {/* 5. Start a new review */}
         {slug && (
-          <div className="pt-2 border-t border-slate-800/60">
+          <div className="pt-2 border-t border-stone-200">
             <a
               href={`/r/${slug}?new=1`}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-stone-500 hover:text-stone-800 transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Submit another review</span>
@@ -296,4 +295,3 @@ export default function ReviewDraftCard({
     </div>
   )
 }
-

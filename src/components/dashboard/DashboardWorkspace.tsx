@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import OverviewTab, { type AnalyticsData } from './OverviewTab'
 import CampaignsTab, { type CampaignItem } from './CampaignsTab'
 import ResponsesTab, { type ResponseItem } from './ResponsesTab'
+import CustomersPortalTab, { type CustomerDetail } from './CustomersPortalTab'
 import FeedbackTab, { type PrivateFeedbackItem } from './FeedbackTab'
 import MenuTab, { type MenuItem } from './MenuTab'
 import SettingsTab, { type BusinessSettings } from './SettingsTab'
@@ -16,6 +17,7 @@ import {
   Utensils,
   Settings,
   Sparkles,
+  Users,
 } from 'lucide-react'
 
 interface DashboardWorkspaceProps {
@@ -24,13 +26,14 @@ interface DashboardWorkspaceProps {
   campaigns: CampaignItem[]
   analytics: AnalyticsData
   responses: ResponseItem[]
+  customers: CustomerDetail[]
   feedbackList: PrivateFeedbackItem[]
   menuItems: MenuItem[]
 }
 
-type TabType = 'overview' | 'campaigns' | 'responses' | 'feedback' | 'menu' | 'settings'
+type TabType = 'overview' | 'customers' | 'responses' | 'campaigns' | 'feedback' | 'menu' | 'settings'
 
-const VALID_TABS: TabType[] = ['overview', 'campaigns', 'responses', 'feedback', 'menu', 'settings']
+const VALID_TABS: TabType[] = ['overview', 'customers', 'responses', 'campaigns', 'feedback', 'menu', 'settings']
 
 export default function DashboardWorkspace({
   initialTab,
@@ -38,6 +41,7 @@ export default function DashboardWorkspace({
   campaigns,
   analytics,
   responses,
+  customers,
   feedbackList,
   menuItems,
 }: DashboardWorkspaceProps) {
@@ -63,10 +67,13 @@ export default function DashboardWorkspace({
     router.refresh()
   }
 
+  const phoneCount = customers.filter((c) => c.hasPhone).length
+
   const tabs: Array<{ key: TabType; label: string; icon: React.ElementType; badge?: number }> = [
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { key: 'campaigns', label: 'QR Campaigns', icon: QrCode, badge: campaigns.length },
+    { key: 'customers', label: 'Customer Portal', icon: Users, badge: phoneCount },
     { key: 'responses', label: 'Responses', icon: MessageSquare, badge: responses.length },
+    { key: 'campaigns', label: 'QR Campaigns', icon: QrCode, badge: campaigns.length },
     {
       key: 'feedback',
       label: 'Private Inbox',
@@ -91,7 +98,7 @@ export default function DashboardWorkspace({
             </span>
           </div>
           <p className="text-xs text-slate-400">
-            {business.location ? `${business.location} • ` : ''}Restaurant Management & Analytics
+            {business.location ? `${business.location} • ` : ''}Restaurant Management &amp; Analytics
           </p>
         </div>
 
@@ -108,7 +115,7 @@ export default function DashboardWorkspace({
                 onClick={() => handleTabChange(tab.key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-md shadow-rose-500/20'
+                    ? 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 text-white shadow-md shadow-amber-600/20 font-bold'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
@@ -132,10 +139,13 @@ export default function DashboardWorkspace({
       {/* Tab Panels */}
       <div>
         {activeTab === 'overview' && <OverviewTab analytics={analytics} />}
+        {activeTab === 'customers' && (
+          <CustomersPortalTab customers={customers} restaurantName={business.name} />
+        )}
+        {activeTab === 'responses' && <ResponsesTab responses={responses} />}
         {activeTab === 'campaigns' && (
           <CampaignsTab campaigns={campaigns} onRefresh={handleRefresh} />
         )}
-        {activeTab === 'responses' && <ResponsesTab responses={responses} />}
         {activeTab === 'feedback' && <FeedbackTab feedbackList={feedbackList} />}
         {activeTab === 'menu' && <MenuTab menuItems={menuItems} onRefresh={handleRefresh} />}
         {activeTab === 'settings' && (

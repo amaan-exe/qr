@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Star, MessageSquare, Utensils, ThumbsUp, Calendar, Filter } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Star, MessageSquare, Utensils, ThumbsUp, Calendar, Filter, Phone, MessageCircle, Copy, Check } from 'lucide-react'
 
 export interface ResponseItem {
   id: string
@@ -16,6 +16,8 @@ export interface ResponseItem {
   ordered: string[]
   draftText: string | null
   draftEdited: boolean
+  customerName?: string | null
+  customerPhone?: string | null
 }
 
 interface ResponsesTabProps {
@@ -32,6 +34,13 @@ const EMOJIS: Record<number, string> = {
 
 export default function ResponsesTab({ responses }: ResponsesTabProps) {
   const [filterRating, setFilterRating] = useState<number | 'all'>('all')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
 
   const filteredResponses = responses.filter((r) => {
     if (filterRating === 'all') return true
@@ -45,7 +54,7 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight">Customer Responses Feed</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Real-time structured feedback and generated review drafts from dining guests
+            Real-time structured feedback, verified diner phone numbers, and generated review drafts
           </p>
         </div>
 
@@ -57,7 +66,7 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
             onClick={() => setFilterRating('all')}
             className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
               filterRating === 'all'
-                ? 'bg-rose-500 text-white'
+                ? 'bg-amber-500 text-slate-950 font-bold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -85,15 +94,15 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
             <MessageSquare className="w-8 h-8 mx-auto text-slate-600" />
             <p className="text-sm font-semibold text-slate-300">No responses recorded yet</p>
             <p className="text-xs max-w-sm mx-auto">
-              Once diners scan your QR codes and complete the 5-question quiz, their structured answers and review drafts will appear here.
+              Once diners scan your QR codes and complete the feedback quiz, their structured answers, phone numbers, and review drafts will appear here.
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {filteredResponses.map((item) => (
-            <Card key={item.id} className="border-slate-800 bg-slate-900/60 backdrop-blur-xl hover:border-slate-750 transition-colors">
-              <CardHeader className="pb-3 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <Card key={item.id} className="border-slate-800 bg-slate-900/60 backdrop-blur-xl hover:border-slate-700 transition-colors">
+              <CardHeader className="pb-3 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1 bg-amber-400/15 border border-amber-400/30 px-2.5 py-1 rounded-xl">
                     <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
@@ -103,7 +112,16 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
                   </div>
 
                   <div>
-                    <CardTitle className="text-sm text-white">{item.campaignName}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-sm text-white">
+                        {item.customerName || item.campaignName}
+                      </CardTitle>
+                      {item.customerName && (
+                        <span className="text-[10px] text-slate-400 px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700">
+                          {item.campaignName}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
                       <Calendar className="w-3 h-3" />
                       <span>
@@ -120,8 +138,23 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
                   </div>
                 </div>
 
-                {/* Sub-Ratings */}
+                {/* Customer Contact & Sub-Ratings */}
                 <div className="flex items-center gap-3 text-xs">
+                  {item.customerPhone && (
+                    <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-lg text-emerald-300 text-[11px] font-mono font-semibold">
+                      <Phone className="w-3 h-3 text-emerald-400" />
+                      <span>+91 {item.customerPhone}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(item.customerPhone!, item.id)}
+                        className="p-0.5 hover:text-white"
+                        title="Copy phone"
+                      >
+                        {copiedId === item.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
+                  )}
+
                   <span className="flex items-center gap-1 text-slate-300">
                     <span>Food:</span>
                     <span className="text-base">{item.foodRating ? EMOJIS[item.foodRating] : '—'}</span>
@@ -139,7 +172,7 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
                   {item.liked.map((l) => (
                     <span
                       key={l}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-300 border border-rose-500/20 flex items-center gap-1"
+                      className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20 flex items-center gap-1"
                     >
                       <ThumbsUp className="w-3 h-3" />
                       {l}

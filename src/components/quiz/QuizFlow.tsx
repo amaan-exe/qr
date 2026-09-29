@@ -12,8 +12,9 @@ import EmojiRatingQuestion from './questions/EmojiRatingQuestion'
 import ServiceRatingQuestion from './questions/ServiceRatingQuestion'
 import ComplimentsQuestion from './questions/ComplimentsQuestion'
 import OrderedItemsQuestion, { type MenuItemData } from './questions/OrderedItemsQuestion'
+import ContactInfoQuestion, { type ContactInfoValue } from './questions/ContactInfoQuestion'
 import { trackClientEvent } from '@/lib/client/telemetry'
-import { Clock, ShieldCheck, ArrowRight, Utensils, Loader2 } from 'lucide-react'
+import { Clock, ShieldCheck, ArrowRight, Utensils, Loader2, Star, MapPin, Sparkles, MessageCircle } from 'lucide-react'
 
 interface QuizFlowProps {
   slug: string
@@ -29,7 +30,7 @@ interface QuizFlowProps {
   menuItems: MenuItemData[]
 }
 
-type QuestionKey = 'overall_rating' | 'food_rating' | 'service_rating' | 'liked' | 'ordered'
+type QuestionKey = 'overall_rating' | 'food_rating' | 'service_rating' | 'liked' | 'ordered' | 'customer_contact'
 
 export default function QuizFlow({
   slug,
@@ -55,13 +56,14 @@ export default function QuizFlow({
   const [hasSyncError, setHasSyncError] = useState(false)
   const [pendingSync, setPendingSync] = useState<{ key: string; value: any } | null>(null)
 
-  // Active question keys (Q5 is omitted if 0 menu items)
+  // Active question keys (includes customer_contact for phone input)
   const questionKeys: QuestionKey[] = [
     'overall_rating',
     'food_rating',
     'service_rating',
     'liked',
     ...(menuItems.length > 0 ? (['ordered'] as QuestionKey[]) : []),
+    'customer_contact',
   ]
 
   // Find first unanswered question if resuming
@@ -82,6 +84,11 @@ export default function QuizFlow({
     service_rating: initialAnswers.service_rating ?? null,
     liked: initialAnswers.liked ?? [],
     ordered: initialAnswers.ordered ?? [],
+    customer_contact: initialAnswers.customer_contact ?? {
+      name: initialAnswers.customer_name ?? '',
+      phone: initialAnswers.customer_phone ?? '',
+      optIn: true,
+    },
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -141,7 +148,6 @@ export default function QuizFlow({
       setView('quiz')
 
       if (activeSessionId) {
-        // Fire start & event asynchronously in background without blocking customer
         fetch(`/api/public/sessions/${activeSessionId}/start`, { method: 'POST' }).catch(console.warn)
         trackClientEvent(activeSessionId, 'QUIZ_STARTED')
       }
@@ -159,6 +165,11 @@ export default function QuizFlow({
 
     if (sessionId) {
       persistAnswer(sessionId, key, value)
+      // When saving customer_contact, also denormalize phone and name for direct queries
+      if (key === 'customer_contact' && typeof value === 'object' && value !== null) {
+        if (value.phone) persistAnswer(sessionId, 'customer_phone', value.phone)
+        if (value.name) persistAnswer(sessionId, 'customer_name', value.name)
+      }
     }
 
     if (autoAdvance && stepIndex < questionKeys.length - 1) {
@@ -193,10 +204,18 @@ export default function QuizFlow({
     }
   }
 
-  // Submit quiz completion -> proceeds directly to Draft screen (Phase 3)
+  // Submit quiz completion -> proceeds directly to Draft screen
   const handleSubmit = async () => {
     if (!sessionId) return
     setIsSubmitting(true)
+
+    // Ensure customer contact answers are sent before submitting
+    const contact = answers.customer_contact
+    if (contact?.phone) {
+      await persistAnswer(sessionId, 'customer_phone', contact.phone)
+      if (contact.name) await persistAnswer(sessionId, 'customer_name', contact.name)
+      await persistAnswer(sessionId, 'customer_contact', contact)
+    }
 
     try {
       const res = await fetch(`/api/public/sessions/${sessionId}/submit`, {
@@ -212,7 +231,7 @@ export default function QuizFlow({
         console.error('Submission failed:', errorData)
         if (errorData?.missing_questions?.[0]) {
           const missingKey = errorData.missing_questions[0]
-          const targetIdx = questionKeys.indexOf(missingKey)
+          const targetIdx = questionKeys.indexOf(missingKey as QuestionKey)
           if (targetIdx !== -1) setStepIndex(targetIdx)
         }
       }
@@ -224,48 +243,82 @@ export default function QuizFlow({
   }
 
   // ==========================================
-  // VIEW 1: LANDING SCREEN
+  // VIEW 1: LANDING SCREEN (WHITE CLASSY LOOK)
   // ==========================================
   if (view === 'landing') {
     return (
       <>
         <OfflineBanner hasSyncError={hasSyncError} onRetry={handleRetry} />
-        <main className="relative z-10 w-full max-w-md mx-auto my-auto py-8">
-          <div className="p-8 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-2xl shadow-2xl space-y-6 text-center animate-in fade-in zoom-in-95 duration-300">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/25 overflow-hidden">
-              {logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoUrl} alt={restaurantName} className="w-full h-full object-cover" />
-              ) : (
-                <Utensils className="w-8 h-8" />
-              )}
+        <main className="relative z-10 w-full max-w-md mx-auto my-auto py-6">
+          <div className="p-7 sm:p-8 rounded-3xl bg-white border border-stone-200 shadow-[0_20px_60px_-15px_rgba(180,83,9,0.08),0_4px_20px_rgba(0,0,0,0.03)] space-y-6 text-center animate-in fade-in zoom-in-95 duration-300">
+            {/* Crest / Monogram Icon */}
+            <div className="relative mx-auto w-20 h-20">
+              <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-500 text-white flex items-center justify-center shadow-xl shadow-amber-600/25 overflow-hidden border-2 border-amber-200">
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoUrl} alt={restaurantName} className="w-full h-full object-cover" />
+                ) : (
+                  <Utensils className="w-9 h-9" />
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1 p-1 rounded-full bg-white shadow-xs border border-stone-200 text-amber-600">
+                <Sparkles className="w-4 h-4 fill-amber-400" />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            {/* Restaurant Name & Subtitle */}
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900">
                 {restaurantName}
               </h1>
-              <p className="text-sm text-slate-400 leading-relaxed">{welcomeMessage}</p>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 py-2 border-y border-slate-800/80 text-xs text-slate-400">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-rose-400" />
-                <span>Takes ~30 seconds</span>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-slate-700" />
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>100% Anonymous</span>
+              <p className="text-sm font-semibold text-amber-800">
+                बिरयानी चारमीनार • Authentic Hyderabadi Dum Biryani
+              </p>
+              <div className="pt-1 flex items-center justify-center gap-2 text-xs text-stone-500">
+                <span className="flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
+                  <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> 3.7 (822 Google Reviews)
+                </span>
+                <span>•</span>
+                <span>₹200–400 per person</span>
               </div>
             </div>
 
-            <div className="pt-2 space-y-3">
+            {/* Address Pill */}
+            <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-[11px] text-stone-600 flex items-center justify-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <span className="truncate">Meera Complex, Kumhrar Rd, Mahatma Gandhi Nagar, Patna</span>
+            </div>
+
+            {/* Welcome Message */}
+            <p className="text-xs text-stone-600 leading-relaxed max-w-sm mx-auto">
+              {welcomeMessage}
+            </p>
+
+            {/* Features Row */}
+            <div className="flex items-center justify-center gap-4 py-2.5 border-y border-stone-100 text-xs text-stone-600">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <span className="font-medium">Takes ~30 sec</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-stone-300" />
+              <div className="flex items-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5 text-amber-600" />
+                <span className="font-medium">5 Quick Questions</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-stone-300" />
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="font-medium">Optional</span>
+              </div>
+            </div>
+
+            {/* Start Button */}
+            <div className="pt-1 space-y-3">
               <button
                 type="button"
                 onClick={handleStart}
                 disabled={isStarting}
-                className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold shadow-lg shadow-rose-500/25 group transition-all duration-200 cursor-pointer text-base active:scale-[0.98] disabled:opacity-80 disabled:cursor-wait"
+                className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-700 hover:to-amber-700 text-white font-bold shadow-lg shadow-amber-600/25 group transition-all duration-200 cursor-pointer text-sm sm:text-base active:scale-[0.98] disabled:opacity-80"
               >
                 {isStarting ? (
                   <>
@@ -274,14 +327,14 @@ export default function QuizFlow({
                   </>
                 ) : (
                   <>
-                    Start Quick Quiz
+                    Share Your Feedback
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
 
-              <p className="text-[11px] text-slate-400">
-                Feedback and reviews are optional. Your honest opinion helps us improve.
+              <p className="text-[11px] text-stone-400">
+                Your authentic feedback helps the chef and team serve you better.
               </p>
             </div>
           </div>
@@ -291,7 +344,7 @@ export default function QuizFlow({
   }
 
   // ==========================================
-  // VIEW 2: DRAFT SCREEN (PHASE 3)
+  // VIEW 2: DRAFT SCREEN (WHITE CLASSY LOOK)
   // ==========================================
   if (view === 'draft' && sessionId) {
     return (
@@ -318,7 +371,7 @@ export default function QuizFlow({
   }
 
   // ==========================================
-  // VIEW 3: THANK YOU SCREEN (PHASE 3)
+  // VIEW 3: THANK YOU SCREEN (WHITE CLASSY LOOK)
   // ==========================================
   if (view === 'thank_you') {
     return (
@@ -336,10 +389,11 @@ export default function QuizFlow({
   }
 
   // ==========================================
-  // VIEW 4: ACTIVE QUIZ STEPS
+  // VIEW 4: ACTIVE QUIZ STEPS (WHITE CLASSY LOOK)
   // ==========================================
   const currentKey = questionKeys[stepIndex]
-  const isCurrentOptional = currentKey === 'liked' || currentKey === 'ordered'
+  const isCurrentOptional =
+    currentKey === 'liked' || currentKey === 'ordered' || currentKey === 'customer_contact'
   const isLastQuestion = stepIndex === questionKeys.length - 1
 
   let canAdvance = true
@@ -350,71 +404,85 @@ export default function QuizFlow({
   return (
     <>
       <OfflineBanner hasSyncError={hasSyncError} onRetry={handleRetry} />
-      <div className="relative z-10 w-full max-w-lg mx-auto py-6 px-4 sm:px-0 flex flex-col justify-between min-h-[580px]">
-      <QuizProgressHeader
-        restaurantName={restaurantName}
-        logoUrl={logoUrl}
-        currentStep={stepIndex + 1}
-        totalSteps={questionKeys.length}
-        onBack={handleBack}
-        canGoBack={stepIndex > 0}
-      />
-
-      <div className="my-auto py-4 sm:py-6">
-        <div className="relative p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden">
-          {/* Subtle ambient lighting behind questions */}
-          <div className="absolute -top-24 -left-24 w-52 h-52 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10">
-            {currentKey === 'overall_rating' && (
-              <StarRatingQuestion
-                value={answers.overall_rating}
-                onChange={(val) => handleSetAnswer('overall_rating', val, true)}
-              />
-            )}
-
-            {currentKey === 'food_rating' && (
-              <EmojiRatingQuestion
-                value={answers.food_rating}
-                onChange={(val) => handleSetAnswer('food_rating', val, true)}
-              />
-            )}
-
-            {currentKey === 'service_rating' && (
-              <ServiceRatingQuestion
-                value={answers.service_rating}
-                onChange={(val) => handleSetAnswer('service_rating', val, true)}
-              />
-            )}
-
-            {currentKey === 'liked' && (
-              <ComplimentsQuestion
-                value={answers.liked || []}
-                onChange={(val) => handleSetAnswer('liked', val, false)}
-              />
-            )}
-
-            {currentKey === 'ordered' && (
-              <OrderedItemsQuestion
-                menuItems={menuItems}
-                value={answers.ordered || []}
-                onChange={(val) => handleSetAnswer('ordered', val, false)}
-              />
-            )}
-          </div>
-        </div>
-
-        <QuizNavigationControls
-          isOptional={isCurrentOptional}
-          isLastQuestion={isLastQuestion}
-          canAdvance={canAdvance}
-          isSubmitting={isSubmitting}
-          onNext={handleNext}
-          onSkip={handleSkip}
+      <div className="relative z-10 w-full max-w-lg mx-auto py-4 sm:py-6 px-4 sm:px-0 flex flex-col justify-between min-h-[580px]">
+        <QuizProgressHeader
+          restaurantName={restaurantName}
+          logoUrl={logoUrl}
+          currentStep={stepIndex + 1}
+          totalSteps={questionKeys.length}
+          onBack={handleBack}
+          canGoBack={stepIndex > 0}
         />
+
+        <div className="my-auto py-4 sm:py-6">
+          <div className="relative p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-[0_20px_50px_-15px_rgba(180,83,9,0.08),0_4px_16px_rgba(0,0,0,0.03)] overflow-hidden">
+            {/* Subtle warm accent glows */}
+            <div className="absolute -top-24 -left-24 w-52 h-52 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              {currentKey === 'overall_rating' && (
+                <StarRatingQuestion
+                  value={answers.overall_rating}
+                  onChange={(val) => handleSetAnswer('overall_rating', val, true)}
+                />
+              )}
+
+              {currentKey === 'food_rating' && (
+                <EmojiRatingQuestion
+                  value={answers.food_rating}
+                  onChange={(val) => handleSetAnswer('food_rating', val, true)}
+                />
+              )}
+
+              {currentKey === 'service_rating' && (
+                <ServiceRatingQuestion
+                  value={answers.service_rating}
+                  onChange={(val) => handleSetAnswer('service_rating', val, true)}
+                />
+              )}
+
+              {currentKey === 'liked' && (
+                <ComplimentsQuestion
+                  value={answers.liked || []}
+                  onChange={(val) => handleSetAnswer('liked', val, false)}
+                />
+              )}
+
+              {currentKey === 'ordered' && (
+                <OrderedItemsQuestion
+                  menuItems={menuItems}
+                  value={answers.ordered || []}
+                  onChange={(val) => handleSetAnswer('ordered', val, false)}
+                />
+              )}
+
+              {currentKey === 'customer_contact' && (
+                <ContactInfoQuestion
+                  value={
+                    answers.customer_contact || {
+                      name: '',
+                      phone: '',
+                      optIn: true,
+                    }
+                  }
+                  onChange={(val: ContactInfoValue) => handleSetAnswer('customer_contact', val, false)}
+                  restaurantName={restaurantName}
+                />
+              )}
+            </div>
+          </div>
+
+          <QuizNavigationControls
+            isOptional={isCurrentOptional}
+            isLastQuestion={isLastQuestion}
+            canAdvance={canAdvance}
+            isSubmitting={isSubmitting}
+            onNext={handleNext}
+            onSkip={handleSkip}
+          />
+        </div>
       </div>
-    </div>
     </>
   )
 }

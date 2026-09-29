@@ -29,7 +29,7 @@ export default function QuizNavigationControls({
             type="button"
             onClick={onSkip}
             disabled={isSubmitting}
-            className="text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 py-2 px-3 rounded-lg hover:bg-slate-850 transition-colors cursor-pointer"
+            className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-900 py-2.5 px-3.5 rounded-xl hover:bg-stone-100 transition-colors cursor-pointer"
           >
             Skip for now
           </button>
@@ -41,21 +41,21 @@ export default function QuizNavigationControls({
         type="button"
         onClick={onNext}
         disabled={!canAdvance || isSubmitting}
-        className="ml-auto bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold h-11 px-6 rounded-xl shadow-lg shadow-rose-500/20 cursor-pointer min-w-[130px] transition-all duration-200"
+        className="ml-auto bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-700 hover:to-amber-700 text-white font-bold h-12 px-6 rounded-xl shadow-lg shadow-amber-600/20 hover:shadow-amber-600/30 cursor-pointer min-w-[140px] transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Submitting...
+            Finishing...
           </>
         ) : isLastQuestion ? (
           <>
             <CheckCircle2 className="w-4 h-4 mr-2" />
-            Finish & Review
+            Review Draft
           </>
         ) : (
           <>
-            Next
+            Continue
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </>
         )}

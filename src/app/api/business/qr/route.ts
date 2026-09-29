@@ -10,9 +10,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Slug parameter is required' }, { status: 400 })
   }
 
-  const host = request.headers.get('host') || 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  const targetUrl = `${protocol}://${host}/r/${slug}`
+  const proto = request.headers.get('x-forwarded-proto') || (process.env.NODE_ENV === 'production' ? 'https' : 'http')
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || process.env.APP_DOMAIN || 'localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${proto}://${host}`
+  const targetUrl = `${baseUrl.replace(/\/$/, '')}/r/${slug}`
 
   try {
     if (format === 'svg') {

@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, Loader2, LogIn, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn, AlertCircle, Sparkles, Utensils } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -40,13 +40,36 @@ export default function LoginPage() {
       router.refresh()
     } catch (err: unknown) {
       const rawMsg = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
-      if (rawMsg.toLowerCase().includes('failed to fetch') || rawMsg.toLowerCase().includes('fetch failed')) {
-        setError(
-          'Cannot reach Supabase: Please configure your live Supabase Project URL and Anon Key in .env.local (currently using placeholder credentials).'
-        )
-      } else {
-        setError(rawMsg)
+      setError(rawMsg)
+      setLoading(false)
+    }
+  }
+
+  // Quick Demo Login for Biryani Charminar Owner
+  const handleQuickDemoLogin = async () => {
+    setEmail('invincibleperson9@gmail.com')
+    setPassword('password123')
+    setError(null)
+    setLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: 'invincibleperson9@gmail.com',
+        password: 'password123',
+      })
+
+      if (authError) {
+        setError(authError.message)
+        setLoading(false)
+        return
       }
+
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err: unknown) {
+      const rawMsg = err instanceof Error ? err.message : 'Login failed'
+      setError(rawMsg)
       setLoading(false)
     }
   }
@@ -54,12 +77,20 @@ export default function LoginPage() {
   return (
     <Card className="border border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl text-slate-100 rounded-2xl overflow-hidden">
       <CardHeader className="space-y-1 pb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-600 to-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-amber-500/20">
+            <Utensils className="w-4 h-4" />
+          </div>
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+            Biryani Charminar Admin
+          </span>
+        </div>
         <CardTitle className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
-          <LogIn className="w-5 h-5 text-rose-500" />
+          <LogIn className="w-5 h-5 text-amber-500" />
           Welcome back
         </CardTitle>
         <CardDescription className="text-slate-400 text-sm">
-          Sign in to manage your restaurant campaigns & review analytics
+          Sign in to view guest responses, customer phone numbers, &amp; analytics
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -70,6 +101,25 @@ export default function LoginPage() {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Quick Demo Login Option */}
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                Quick Owner Demo Login
+              </span>
+              <span className="text-[10px] text-amber-400/80 font-mono">1-Click</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleQuickDemoLogin}
+              disabled={loading}
+              className="w-full h-8 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              Sign in as Biryani Charminar Owner
+            </button>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="email" className="text-xs font-medium text-slate-300">
@@ -83,7 +133,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="bg-slate-950/60 border-slate-800 focus:border-rose-500 text-white placeholder:text-slate-500 h-10 rounded-lg"
+              className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 rounded-lg"
             />
           </div>
 
@@ -102,7 +152,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                className="bg-slate-950/60 border-slate-800 focus:border-rose-500 text-white placeholder:text-slate-500 h-10 pr-10 rounded-lg"
+                className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 pr-10 rounded-lg"
               />
               <button
                 type="button"
@@ -120,7 +170,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-medium h-10 rounded-lg shadow-lg shadow-rose-500/25 transition-all duration-200 cursor-pointer"
+            className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white font-bold h-10 rounded-lg shadow-lg shadow-amber-600/25 transition-all duration-200 cursor-pointer"
           >
             {loading ? (
               <>
@@ -128,18 +178,12 @@ export default function LoginPage() {
                 Signing in...
               </>
             ) : (
-              'Sign in'
+              'Sign in to Dashboard'
             )}
           </Button>
 
-          <p className="text-xs text-center text-slate-400">
-            Don&apos;t have an account yet?{' '}
-            <Link
-              href="/signup"
-              className="text-rose-400 hover:text-rose-300 font-medium underline underline-offset-4 hover:underline-offset-2 transition-all"
-            >
-              Create account
-            </Link>
+          <p className="text-xs text-center text-slate-500">
+            Biryani Charminar Admin Portal • Owner Access Only
           </p>
         </CardFooter>
       </form>

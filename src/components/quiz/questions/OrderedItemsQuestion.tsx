@@ -1,6 +1,6 @@
 'use client'
 
-import { UtensilsCrossed, Check, Plus } from 'lucide-react'
+import { UtensilsCrossed, Check, Plus, Sparkles } from 'lucide-react'
 
 export interface MenuItemData {
   id: string
@@ -37,23 +37,23 @@ export default function OrderedItemsQuestion({
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
       <div className="space-y-2.5">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-300">
-            Question 5 of 5
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-900">
+            Question 5 of 6
           </span>
-          <span className="text-slate-600">•</span>
-          <span className="text-[11px] text-slate-400">Optional</span>
+          <span className="text-stone-300">•</span>
+          <span className="text-[11px] text-amber-800 font-medium">Optional</span>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          What did you{' '}
-          <span className="bg-gradient-to-r from-amber-300 via-rose-300 to-amber-200 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
+          Which dishes did you{' '}
+          <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
             order today
           </span>
           ?
         </h2>
-        <p className="text-sm text-slate-400">
-          Select dishes or beverages you enjoyed
+        <p className="text-sm text-stone-600">
+          Select biryanis, kebabs, or desserts you enjoyed
         </p>
       </div>
 
@@ -75,47 +75,27 @@ export default function OrderedItemsQuestion({
               aria-checked={isSelected}
               onClick={() => toggleItem(item.id)}
               aria-label={name}
-              className={`px-4 py-2.5 min-h-[44px] rounded-full border text-sm font-medium flex items-center gap-2 transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
+              className={`px-4 py-2.5 min-h-[44px] rounded-full border text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 shadow-xs ${
                 isSelected
-                  ? 'border-rose-500 bg-rose-500 text-white shadow-md shadow-rose-500/25'
-                  : 'border-slate-800 bg-slate-900/80 text-slate-300 hover:border-slate-700 hover:bg-slate-800/80'
+                  ? 'border-amber-600 bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md shadow-amber-600/20'
+                  : 'border-stone-200 bg-stone-50/70 text-stone-700 hover:bg-white hover:border-amber-300 hover:text-stone-900'
               }`}
             >
               {isSelected ? (
-                <Check className="w-4 h-4 stroke-[3]" />
+                <Check className="w-4 h-4 stroke-[2.5]" />
               ) : (
-                <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400" />
+                <Plus className="w-3.5 h-3.5 text-stone-400" />
               )}
               <span>{name}</span>
             </button>
           )
         })}
-
-        {/* 'Other' Chip Option */}
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={value.includes('other')}
-          onClick={() => toggleItem('other')}
-          aria-label="Other dishes"
-          className={`px-4 py-2.5 min-h-[44px] rounded-full border text-sm font-medium flex items-center gap-2 transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-            value.includes('other')
-              ? 'border-amber-500 bg-amber-500 text-slate-950 font-semibold shadow-md shadow-amber-500/25'
-              : 'border-dashed border-slate-700 bg-slate-900/40 text-slate-400 hover:border-slate-600 hover:text-slate-200'
-          }`}
-        >
-          {value.includes('other') ? (
-            <Check className="w-4 h-4 stroke-[3]" />
-          ) : (
-            <Plus className="w-3.5 h-3.5" />
-          )}
-          <span>Other dishes</span>
-        </button>
       </div>
 
-      <p className="text-xs text-slate-400">
-        {value.length === 0 ? 'Select any dishes or tap Finish' : `${value.length} item(s) selected`}
-      </p>
+      <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone-400">
+        <UtensilsCrossed className="w-3.5 h-3.5 text-amber-600" />
+        <span>Tap multiple items if you shared a meal</span>
+      </div>
     </div>
   )
 }

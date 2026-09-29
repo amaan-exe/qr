@@ -30,7 +30,7 @@ export default function QuizProgressHeader({
             <button
               type="button"
               onClick={onBack}
-              className="p-2 -ml-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2 -ml-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer"
               aria-label="Previous question"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -38,29 +38,32 @@ export default function QuizProgressHeader({
           )}
 
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center font-bold text-xs overflow-hidden shrink-0 shadow-sm">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-500 text-white flex items-center justify-center font-bold text-xs overflow-hidden shrink-0 shadow-sm border border-amber-300">
               {logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logoUrl} alt={restaurantName} className="w-full h-full object-cover" />
               ) : (
-                <Utensils className="w-3.5 h-3.5" />
+                <Utensils className="w-4 h-4" />
               )}
             </div>
-            <span className="text-sm font-semibold text-slate-200 truncate max-w-[180px] sm:max-w-xs">
-              {restaurantName}
-            </span>
+            <div>
+              <span className="text-sm font-bold text-stone-900 truncate block max-w-[180px] sm:max-w-xs">
+                {restaurantName}
+              </span>
+              <span className="text-[10px] text-amber-800 font-semibold block">बिरयानी चारमीनार</span>
+            </div>
           </div>
         </div>
 
-        <div className="text-xs font-medium text-slate-400">
-          Question <span className="text-white font-bold">{currentStep}</span> of {totalSteps}
+        <div className="text-xs font-semibold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full border border-stone-200">
+          Step <span className="text-amber-800 font-bold">{currentStep}</span> of {totalSteps}
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full h-1.5 bg-slate-800/80 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-stone-200/90 rounded-full overflow-hidden p-0.5">
         <div
-          className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full transition-all duration-300 ease-out"
+          className="h-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 rounded-full transition-all duration-300 ease-out shadow-xs"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

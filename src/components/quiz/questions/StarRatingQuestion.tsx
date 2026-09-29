@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Star } from 'lucide-react'
+import { Star, Sparkles } from 'lucide-react'
 
 interface StarRatingQuestionProps {
   value: number | null
@@ -41,23 +41,23 @@ export default function StarRatingQuestion({ value, onChange }: StarRatingQuesti
   return (
     <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-3 duration-300">
       <div className="space-y-2.5">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 shadow-sm backdrop-blur-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-300">
-            Question 1 of 5
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-amber-900">
+            Question 1 of 6
           </span>
-          <span className="text-slate-600">•</span>
-          <span className="text-[11px] text-slate-400">Required</span>
+          <span className="text-stone-300">•</span>
+          <span className="text-[11px] text-amber-800 font-medium">Required</span>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
           How was your{' '}
-          <span className="bg-gradient-to-r from-amber-300 via-rose-300 to-amber-200 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-yellow-600 bg-clip-text text-transparent">
             overall experience
           </span>{' '}
           today?
         </h2>
-        <p className="text-sm text-slate-400">
-          Tap a star to rate your visit
+        <p className="text-sm text-stone-600">
+          Tap a star to rate your dining visit
         </p>
       </div>
 
@@ -83,17 +83,17 @@ export default function StarRatingQuestion({ value, onChange }: StarRatingQuesti
               onMouseEnter={() => setHovered(star)}
               onMouseLeave={() => setHovered(null)}
               aria-label={`Rate ${star} star${star > 1 ? 's' : ''}: ${RATING_LABELS[star]}`}
-              className={`relative min-w-[48px] min-h-[48px] p-2.5 sm:p-3 rounded-2xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-95 flex items-center justify-center ${
+              className={`relative min-w-[50px] min-h-[50px] p-2.5 sm:p-3.5 rounded-2xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 active:scale-95 flex items-center justify-center ${
                 isSelected
-                  ? 'bg-amber-400/15 scale-110 shadow-lg shadow-amber-500/20'
-                  : 'hover:bg-slate-800/60 hover:scale-105'
+                  ? 'bg-amber-50 scale-110 shadow-lg shadow-amber-500/15 border border-amber-300'
+                  : 'hover:bg-stone-50 hover:scale-105 border border-transparent'
               }`}
             >
               <Star
                 className={`w-9 h-9 sm:w-11 sm:h-11 transition-all duration-200 ${
                   isFilled
-                    ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]'
-                    : 'text-slate-600 fill-transparent hover:text-slate-500'
+                    ? 'text-amber-400 fill-amber-400 drop-shadow-[0_3px_10px_rgba(251,191,36,0.45)]'
+                    : 'text-stone-300 fill-transparent hover:text-stone-400'
                 }`}
               />
             </button>
@@ -104,11 +104,11 @@ export default function StarRatingQuestion({ value, onChange }: StarRatingQuesti
       {/* Verbal Feedback Label */}
       <div className="h-6" aria-live="polite">
         {activeRating > 0 ? (
-          <p className="text-sm font-semibold text-amber-300 animate-in fade-in duration-200">
+          <p className="text-sm font-semibold text-amber-800 animate-in fade-in duration-200">
             {RATING_LABELS[activeRating]}
           </p>
         ) : (
-          <p className="text-xs text-slate-400">Select 1 to 5 stars</p>
+          <p className="text-xs text-stone-500">Select 1 to 5 stars</p>
         )}
       </div>
     </div>

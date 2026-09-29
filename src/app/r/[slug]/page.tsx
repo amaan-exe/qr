@@ -20,34 +20,34 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
     .eq('slug', slug)
     .single()
 
-  // Invalid slug fallback screen
+  // Invalid slug fallback screen (White Classy)
   if (!campaign) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm text-center p-8 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 text-stone-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm text-center p-8 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-full bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold text-white">QR Code Not Found</h1>
-          <p className="text-sm text-slate-400">
-            This QR code is not valid or has been removed. Please ask your server for assistance.
+          <h1 className="text-xl font-bold text-stone-900">QR Code Not Found</h1>
+          <p className="text-sm text-stone-500">
+            This QR code is not valid or has been removed. Please ask your server at Biryani Charminar for assistance.
           </p>
         </div>
       </div>
     )
   }
 
-  // Inactive campaign fallback screen
+  // Inactive campaign fallback screen (White Classy)
   if (!campaign.active) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm text-center p-8 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="w-12 h-12 mx-auto rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 text-stone-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm text-center p-8 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-full bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
             <Clock className="w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold text-white">QR Code Inactive</h1>
-          <p className="text-sm text-slate-400">
-            This QR code is no longer active. Thank you for your interest!
+          <h1 className="text-xl font-bold text-stone-900">QR Code Inactive</h1>
+          <p className="text-sm text-stone-500">
+            This QR campaign is currently inactive. Thank you for visiting Biryani Charminar!
           </p>
         </div>
       </div>
@@ -120,22 +120,22 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
     }
   }
 
-  const restaurantName = business?.name ?? 'Restaurant'
+  const restaurantName = business?.name ?? 'Biryani Charminar'
   const welcomeText =
     (business?.welcome_message?.en as string | undefined) ??
-    "Thanks for dining with us! We'd love to hear about your experience today."
+    'Welcome to Biryani Charminar! We would love to hear about your experience today.'
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-slate-100 flex flex-col justify-between p-4 sm:p-6 selection:bg-rose-500 selection:text-white relative overflow-hidden">
-      {/* Ambient background glows */}
-      <div className="fixed top-12 left-1/2 -translate-x-1/2 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-10 right-1/4 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-amber-50/30 to-stone-100 text-stone-900 flex flex-col justify-between p-4 sm:p-6 selection:bg-amber-600 selection:text-white relative overflow-hidden font-sans">
+      {/* Ambient warm gold & saffron glows */}
+      <div className="fixed -top-12 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-200/35 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 right-1/4 w-80 h-80 bg-yellow-200/25 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-center pt-2">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700/50 backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-[11px] font-medium text-slate-300">Quick Guest Feedback</span>
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-stone-200/90 shadow-xs backdrop-blur-md">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          <span className="text-[11px] font-bold text-amber-950">Guest Feedback Survey</span>
         </div>
       </header>
 
@@ -155,9 +155,11 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
       />
 
       {/* Footer */}
-      <footer className="relative z-10 text-center py-3 text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+      <footer className="relative z-10 text-center py-3 text-[11px] text-stone-400 flex items-center justify-center gap-1.5">
         <span>Powered by</span>
-        <span className="font-semibold text-slate-400">ReviewPulse</span>
+        <span className="font-bold text-stone-700">ReviewPulse</span>
+        <span>•</span>
+        <span>Biryani Charminar, Patna</span>
       </footer>
     </div>
   )
