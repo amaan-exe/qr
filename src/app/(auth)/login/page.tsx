@@ -2,18 +2,18 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, Loader2, LogIn, AlertCircle, Sparkles, Utensils } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn, AlertCircle, Sparkles, Utensils, KeyRound, UserCheck } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  // Hardcoded default credentials for quick and easy access
+  const [email, setEmail] = useState('admin')
+  const [password, setPassword] = useState('password123')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -25,8 +25,20 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
+      
+      // Resolve alias 'admin' or 'owner' to the registered Biryani Charminar owner account
+      let resolvedEmail = email.trim()
+      if (
+        resolvedEmail.toLowerCase() === 'admin' ||
+        resolvedEmail.toLowerCase() === 'owner' ||
+        resolvedEmail.toLowerCase() === 'biryani' ||
+        resolvedEmail.toLowerCase() === 'charminar'
+      ) {
+        resolvedEmail = 'invincibleperson9@gmail.com'
+      }
+
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: resolvedEmail,
         password,
       })
 
@@ -45,9 +57,9 @@ export default function LoginPage() {
     }
   }
 
-  // Quick Demo Login for Biryani Charminar Owner
+  // Quick 1-Click Demo Login for Biryani Charminar Owner
   const handleQuickDemoLogin = async () => {
-    setEmail('invincibleperson9@gmail.com')
+    setEmail('admin')
     setPassword('password123')
     setError(null)
     setLoading(true)
@@ -121,25 +133,46 @@ export default function LoginPage() {
             </button>
           </div>
 
+          {/* Credentials Display Banner */}
+          <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between text-[11px] font-semibold">
+              <span className="text-slate-400 flex items-center gap-1">
+                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                Hardcoded Credentials
+              </span>
+              <span className="text-emerald-400 font-mono text-[10px]">Pre-filled</span>
+            </div>
+            <div className="flex items-center justify-between font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800/80">
+              <span className="text-slate-400">Username:</span>
+              <span className="text-amber-300 font-bold select-all">admin</span>
+            </div>
+            <div className="flex items-center justify-between font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800/80">
+              <span className="text-slate-400">Password:</span>
+              <span className="text-amber-300 font-bold select-all">password123</span>
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-xs font-medium text-slate-300">
-              Email address
+            <Label htmlFor="username" className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-amber-500" />
+              Username or Email
             </Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="owner@restaurant.com"
+              id="username"
+              type="text"
+              placeholder="admin"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 rounded-lg"
+              className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 rounded-lg font-mono text-sm"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-xs font-medium text-slate-300">
+              <Label htmlFor="password" className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-amber-500" />
                 Password
               </Label>
             </div>
@@ -147,12 +180,12 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
+                placeholder="password123"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 pr-10 rounded-lg"
+                className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 pr-10 rounded-lg font-mono text-sm"
               />
               <button
                 type="button"
