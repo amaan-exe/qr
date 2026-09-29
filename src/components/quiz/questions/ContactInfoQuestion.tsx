@@ -103,7 +103,7 @@ export default function ContactInfoQuestion({
               onChange={handleNameChange}
               onFocus={() => setIsFocused('name')}
               onBlur={() => setIsFocused(null)}
-              placeholder="e.g. Md Amanullah / Rahul"
+              placeholder="Enter your name"
               className="w-full h-12 px-4 bg-transparent text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none"
             />
           </div>
