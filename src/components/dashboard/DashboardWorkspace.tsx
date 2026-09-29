@@ -9,6 +9,9 @@ import FeedbackTab from './FeedbackTab'
 import MenuTab from './MenuTab'
 import SettingsTab from './SettingsTab'
 import CustomersPortalTab, { type CustomerDetail } from './CustomersPortalTab'
+import MobileBottomNav from './MobileBottomNav'
+import MobileMenuDrawer from './MobileMenuDrawer'
+import { usePwa } from '@/components/pwa/PwaProvider'
 import {
   LayoutDashboard,
   QrCode,
@@ -18,7 +21,11 @@ import {
   Settings,
   Sparkles,
   Users,
+  ExternalLink,
+  Download,
+  Menu,
 } from 'lucide-react'
+import Link from 'next/link'
 
 interface DashboardWorkspaceProps {
   initialTab?: string
@@ -49,10 +56,12 @@ export default function DashboardWorkspace({
   const searchParams = useSearchParams()
   const queryTab = searchParams.get('tab')
   const initialTab = propInitialTab || queryTab
+  const { isInstallable, isInstalled, promptInstall, setShowInstallModal } = usePwa()
 
   const [activeTab, setActiveTab] = useState<TabType>(
     initialTab && VALID_TABS.includes(initialTab as TabType) ? (initialTab as TabType) : 'overview'
   )
+  const [isMoreDrawerOpen, setIsMoreDrawerOpen] = useState(false)
 
   useEffect(() => {
     if (initialTab && VALID_TABS.includes(initialTab as TabType)) {
@@ -69,6 +78,14 @@ export default function DashboardWorkspace({
 
   const handleRefresh = () => {
     router.refresh()
+  }
+
+  const handleInstallClick = async () => {
+    if (isInstallable) {
+      await promptInstall()
+    } else {
+      setShowInstallModal(true)
+    }
   }
 
   const phoneCount = customers.filter((c) => c.hasPhone).length
@@ -89,10 +106,10 @@ export default function DashboardWorkspace({
   ]
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-safe-nav md:pb-6">
       {/* Restaurant Header */}
       <div className="space-y-3 pb-3 border-b border-slate-800/80">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white">
@@ -106,9 +123,49 @@ export default function DashboardWorkspace({
               {business.location ? `${business.location} • ` : ''}Restaurant Management &amp; Analytics
             </p>
           </div>
+
+          {/* Quick Action Buttons for Mobile / Tablet */}
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* Live Survey Guest Preview */}
+            <Link
+              href="/r/patna-dining"
+              target="_blank"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors shadow-xs active:scale-95"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Live Survey</span>
+            </Link>
+
+            {/* PWA Install Trigger / Badge */}
+            {!isInstalled ? (
+              <button
+                type="button"
+                onClick={handleInstallClick}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all cursor-pointer active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Install App</span>
+              </button>
+            ) : (
+              <span className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-semibold text-slate-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                PWA Installed
+              </span>
+            )}
+
+            {/* Mobile Drawer Trigger for More items */}
+            <button
+              type="button"
+              onClick={() => setIsMoreDrawerOpen(true)}
+              aria-label="Open mobile menu"
+              className="md:hidden flex items-center justify-center w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Tab Navigation Buttons - Touch-friendly Mobile Horizontal Bar */}
+        {/* Tab Navigation Buttons - Horizontal Desktop/Tablet Bar */}
         <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900/90 border border-slate-800/90 overflow-x-auto no-scrollbar scroll-smooth">
           {tabs.map((tab) => {
             const Icon = tab.icon
@@ -158,6 +215,28 @@ export default function DashboardWorkspace({
         )}
         {activeTab === 'settings' && <SettingsTab business={business} onRefresh={handleRefresh} />}
       </div>
+
+      {/* Mobile Bottom Navigation Bar (Docked on phones) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onSelectTab={handleTabChange}
+        phoneCount={phoneCount}
+        responsesCount={responses.length}
+        hasFeedback={feedbackList.length > 0}
+        onOpenMore={() => setIsMoreDrawerOpen(true)}
+      />
+
+      {/* Mobile Slide-up Drawer */}
+      <MobileMenuDrawer
+        isOpen={isMoreDrawerOpen}
+        onClose={() => setIsMoreDrawerOpen(false)}
+        onSelectTab={handleTabChange}
+        onRefresh={handleRefresh}
+        feedbackCount={feedbackList.length}
+        menuItemsCount={menuItems.length}
+        restaurantName={business.name}
+        restaurantLocation={business.location}
+      />
     </div>
   )
 }

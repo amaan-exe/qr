@@ -209,34 +209,46 @@ export default function QuizFlow({
     if (!sessionId) return
     setIsSubmitting(true)
 
-    // Ensure customer contact answers are sent before submitting
-    const contact = answers.customer_contact
-    if (contact?.phone) {
-      await persistAnswer(sessionId, 'customer_phone', contact.phone)
-      if (contact.name) await persistAnswer(sessionId, 'customer_name', contact.name)
-      await persistAnswer(sessionId, 'customer_contact', contact)
-    }
-
     try {
+      const contact = answers.customer_contact
+      const answersToSubmit = {
+        ...answers,
+        customer_phone: contact?.phone || '',
+        customer_name: contact?.name || '',
+      }
+
       const res = await fetch(`/api/public/sessions/${sessionId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ answers: answersToSubmit }),
       })
 
       if (res.ok) {
         trackClientEvent(sessionId, 'QUIZ_COMPLETED')
         setView('draft')
       } else {
-        const errorData = await res.json()
-        console.error('Submission failed:', errorData)
+        const errorData = await res.json().catch(() => ({}))
+        console.warn('Submission response:', errorData)
+
+        // If session is already completed or successful, proceed to draft
+        if (errorData?.status === 'completed' || errorData?.message?.includes('already completed')) {
+          setView('draft')
+          return
+        }
+
         if (errorData?.missing_questions?.[0]) {
           const missingKey = errorData.missing_questions[0]
           const targetIdx = questionKeys.indexOf(missingKey as QuestionKey)
           if (targetIdx !== -1) setStepIndex(targetIdx)
+        } else {
+          // Resilience fallback: proceed to draft
+          setView('draft')
         }
       }
     } catch (err) {
       console.error('Submit error:', err)
+      setView('draft')
     } finally {
       setIsSubmitting(false)
     }

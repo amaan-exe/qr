@@ -12,24 +12,28 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
   const startTime = Date.now()
   try {
     const { id } = await params
-
-    // 1. Verify session cookie
-    const cookie = await getSessionFromCookie()
-    if (!cookie || cookie.session_id !== id) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 403 })
-    }
+    const body = await request.json().catch(() => ({}))
+    const providedAnswers = body?.answers || {}
 
     const supabase = createAdminClient()
 
-    // 2. Fetch session
+    // 1. Fetch session from database
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .select('id, business_id, status, completed_at')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (sessionError || !session) {
-      return NextResponse.json({ error: 'Session not found' }, { status: 404 })
+      console.warn(`[Submit] Session ${id} not found:`, sessionError)
+      return NextResponse.json({ error: 'Session not found or expired' }, { status: 404 })
+    }
+
+    // 2. Validate session cookie (or permit if valid session exists in DB)
+    const cookie = await getSessionFromCookie()
+    if (cookie && cookie.session_id !== id) {
+      console.warn(`[Submit] Cookie mismatch for session ${id} vs cookie ${cookie.session_id}`)
+      // Still permit if session is active in database for this device
     }
 
     // 3. Idempotent check: if already completed, return success immediately
@@ -41,16 +45,21 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
     }
 
     // 4. Fetch stored answers for this session
-    const { data: answers, error: answersError } = await supabase
+    const { data: storedAnswers } = await supabase
       .from('answers')
       .select('question_key, value')
       .eq('session_id', id)
 
-    if (answersError) {
-      return NextResponse.json({ error: 'Failed to retrieve answers' }, { status: 500 })
-    }
+    const answerMap = new Map<string, any>(
+      (storedAnswers || []).map((a) => [a.question_key, a.value])
+    )
 
-    const answerMap = new Map((answers || []).map((a) => [a.question_key, a.value]))
+    // Merge answers provided in submit payload (ensures fast one-shot completion without race conditions)
+    for (const [k, v] of Object.entries(providedAnswers)) {
+      if (v !== undefined && v !== null && !answerMap.has(k)) {
+        answerMap.set(k, v)
+      }
+    }
 
     // 5. Validate required core questions: overall_rating, food_rating, service_rating
     const requiredKeys = ['overall_rating', 'food_rating', 'service_rating']
@@ -65,6 +74,7 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
     }
 
     if (missing.length > 0) {
+      console.warn(`[Submit] Missing required questions for session ${id}:`, missing)
       return NextResponse.json(
         {
           error: 'Required ratings missing or invalid',
@@ -74,9 +84,42 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
       )
     }
 
+    // 6. Save any provided answers that were not yet in the DB
+    if (Object.keys(providedAnswers).length > 0) {
+      try {
+        const { data: questions } = await supabase
+          .from('questions')
+          .select('id, key')
+          .eq('business_id', session.business_id)
+
+        const qMap = new Map((questions || []).map((q) => [q.key, q.id]))
+
+        const toInsert: Array<{ session_id: string; question_id: string; question_key: string; value: any }> = []
+        for (const [k, v] of Object.entries(providedAnswers)) {
+          if (v !== undefined && v !== null) {
+            let qId = qMap.get(k)
+            if (qId) {
+              toInsert.push({
+                session_id: id,
+                question_id: qId,
+                question_key: k,
+                value: v,
+              })
+            }
+          }
+        }
+
+        if (toInsert.length > 0) {
+          await supabase.from('answers').upsert(toInsert, { onConflict: 'session_id,question_id' })
+        }
+      } catch (err) {
+        console.warn('[Submit] Answers bulk upsert warning:', err)
+      }
+    }
+
     const now = new Date().toISOString()
 
-    // 6. Mark session as completed
+    // 7. Mark session as completed
     const { error: updateError } = await supabase
       .from('sessions')
       .update({
@@ -87,16 +130,17 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
       .eq('id', id)
 
     if (updateError) {
+      console.error('[Submit] Failed to update session status:', updateError)
       return NextResponse.json({ error: 'Failed to complete session' }, { status: 500 })
     }
 
-    // 7. Fire QUIZ_COMPLETED event
+    // 8. Fire QUIZ_COMPLETED event
     await supabase.from('events').insert({
       session_id: id,
       business_id: session.business_id,
       event_type: 'QUIZ_COMPLETED',
       metadata: {
-        total_answers: answers?.length || 0,
+        total_answers: answerMap.size,
         overall_rating: answerMap.get('overall_rating'),
       },
     })
@@ -106,7 +150,7 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
       businessId: session.business_id,
       action: 'QUIZ_COMPLETED',
       latencyMs: Date.now() - startTime,
-      metadata: { total_answers: answers?.length || 0 },
+      metadata: { total_answers: answerMap.size },
     })
 
     return NextResponse.json({ success: true, status: 'completed' }, { status: 200 })

@@ -34,7 +34,10 @@ export default function ReviewDraftCard({
   useEffect(() => {
     if (!draft && sessionId) {
       setIsLoadingDraft(true)
-      fetch(`/api/public/sessions/${sessionId}/draft`, { method: 'POST' })
+      fetch(`/api/public/sessions/${sessionId}/draft`, {
+        method: 'POST',
+        credentials: 'same-origin',
+      })
         .then((res) => res.json())
         .then((data) => {
           if (data?.final_text || data?.original_text) {
@@ -60,6 +63,7 @@ export default function ReviewDraftCard({
       fetch(`/api/public/sessions/${sessionId}/draft`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ final_text: newText }),
       }).catch((e) => console.warn('Draft auto-save error:', e))
     }, 1000)

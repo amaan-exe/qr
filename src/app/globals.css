@@ -127,6 +127,35 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Mobile Safe Area utilities */
+  .pt-safe {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+  .pb-safe {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  .pb-safe-nav {
+    padding-bottom: max(5.25rem, calc(env(safe-area-inset-bottom) + 4.75rem));
+  }
+  .pl-safe {
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+  }
+  .pr-safe {
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+  .top-safe {
+    top: env(safe-area-inset-top);
+  }
+  .bottom-safe {
+    bottom: env(safe-area-inset-bottom);
+  }
+  .min-h-safe-screen {
+    min-height: 100dvh;
+  }
+  .h-safe-screen {
+    height: 100dvh;
+  }
 }
 
 @layer base {
@@ -137,14 +166,35 @@
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: none;
   }
   html {
     @apply font-sans;
+    -webkit-text-size-adjust: 100%;
   }
+
+  /* Prevent 300ms mobile touch delay */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+
   /* Prevent iOS Safari auto-zoom on input focus */
   @media screen and (max-width: 768px) {
     input, select, textarea {
       font-size: 16px !important;
+    }
+  }
+
+  /* Standalone PWA UI polish */
+  @media all and (display-mode: standalone) {
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, textarea {
+      user-select: text;
+      -webkit-user-select: text;
     }
   }
 }

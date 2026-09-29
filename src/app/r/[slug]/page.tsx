@@ -140,17 +140,17 @@ export default async function PublicQuizPage({ params, searchParams }: PublicQui
     'Welcome to Biryani Charminar! Authentic Hyderabadi Dum Biryani, royal kebabs & Mughlai delicacies. Share your honest experience with us in 30 seconds.'
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-b from-stone-50 via-amber-50/30 to-stone-100 text-stone-900 flex flex-col justify-between px-3 sm:px-6 py-3 sm:py-6 selection:bg-amber-600 selection:text-white relative overflow-x-hidden font-sans">
+    <div className="min-h-screen min-h-[100dvh] min-h-safe-screen bg-[#faf8f5] bg-gradient-to-b from-[#fdfbf7] via-[#fbf7ee] to-[#f6efe0] text-stone-900 flex flex-col justify-between px-3 sm:px-6 pt-safe pb-safe py-3 sm:py-6 selection:bg-amber-600 selection:text-white relative overflow-x-hidden font-sans">
       {/* Ambient warm gold & saffron glows */}
-      <div className="fixed -top-12 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-amber-200/35 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-60 sm:w-80 h-60 sm:h-80 bg-yellow-200/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed -top-12 left-1/2 -translate-x-1/2 w-80 h-80 bg-amber-300/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 right-1/4 w-80 h-80 bg-yellow-300/20 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header Badge */}
       <header className="relative z-10 flex items-center justify-center pt-1 sm:pt-2">
         <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/95 border border-stone-200/90 shadow-xs backdrop-blur-md">
           <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-amber-600 shrink-0" />
           <span className="text-[10px] sm:text-[11px] font-bold text-amber-950 tracking-wide">
-            Guest Feedback Survey
+            Biryani Charminar • Guest Feedback
           </span>
         </div>
       </header>
