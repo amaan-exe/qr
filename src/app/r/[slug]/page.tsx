@@ -1,30 +1,44 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getSessionFromCookie } from '@/lib/session/cookie'
 import QuizFlow from '@/components/quiz/QuizFlow'
-import { AlertTriangle, Clock, Sparkles } from 'lucide-react'
+import { Sparkles, AlertTriangle } from 'lucide-react'
+import { cookies } from 'next/headers'
 
-interface Props {
+interface PublicQuizPageProps {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ new?: string }>
 }
 
-export default async function CustomerLandingPage({ params, searchParams }: Props) {
+export default async function PublicQuizPage({ params, searchParams }: PublicQuizPageProps) {
   const { slug } = await params
   const { new: forceNew } = await searchParams
   const supabase = createAdminClient()
 
   // 1. Look up campaign by slug
-  const { data: campaign } = await supabase
+  let { data: campaign } = await supabase
     .from('campaigns')
-    .select('id, active, business_id, google_review_url_override, businesses(id, name, logo_url, primary_color, welcome_message, google_review_url)')
+    .select('id, active, slug, business_id, google_review_url_override, businesses(id, name, logo_url, primary_color, welcome_message, google_review_url)')
     .eq('slug', slug)
-    .single()
+    .maybeSingle()
 
-  // Invalid slug fallback screen (White Classy)
+  // Graceful fallback: If this slug was deleted or user enters custom slug, resolve to the active Biryani Charminar campaign
+  if (!campaign) {
+    const { data: fallbackCampaign } = await supabase
+      .from('campaigns')
+      .select('id, active, slug, business_id, google_review_url_override, businesses(id, name, logo_url, primary_color, welcome_message, google_review_url)')
+      .eq('active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (fallbackCampaign) {
+      campaign = fallbackCampaign
+    }
+  }
+
+  // Fallback screen if no campaign exists at all
   if (!campaign) {
     return (
       <div className="min-h-screen bg-stone-50 text-stone-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm text-center p-8 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-4">
+        <div className="w-full max-w-sm text-center p-6 sm:p-8 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-4">
           <div className="w-12 h-12 mx-auto rounded-full bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6" />
           </div>
@@ -37,17 +51,17 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
     )
   }
 
-  // Inactive campaign fallback screen (White Classy)
+  // Inactive campaign fallback screen
   if (!campaign.active) {
     return (
       <div className="min-h-screen bg-stone-50 text-stone-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm text-center p-8 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-4">
+        <div className="w-full max-w-sm text-center p-6 sm:p-8 rounded-3xl bg-white border border-stone-200 shadow-xl space-y-4">
           <div className="w-12 h-12 mx-auto rounded-full bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
-            <Clock className="w-6 h-6" />
+            <AlertTriangle className="w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold text-stone-900">QR Code Inactive</h1>
+          <h1 className="text-xl font-bold text-stone-900">Survey Temporarily Inactive</h1>
           <p className="text-sm text-stone-500">
-            This QR campaign is currently inactive. Thank you for visiting Biryani Charminar!
+            This feedback code is currently paused by Biryani Charminar. Please check with your server.
           </p>
         </div>
       </div>
@@ -59,40 +73,41 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
     name: string
     logo_url: string | null
     primary_color: string | null
-    welcome_message: any
+    welcome_message: Record<string, string> | null
     google_review_url: string | null
-  }
+  } | null
 
-  const googleReviewUrl = campaign.google_review_url_override || business?.google_review_url || null
+  const googleReviewUrl = campaign.google_review_url_override || business?.google_review_url
 
-  // 2. Fetch active menu items for this restaurant
+  // 2. Fetch menu items for the ordered items step
   const { data: menuItems } = await supabase
     .from('menu_items')
     .select('id, name')
     .eq('business_id', campaign.business_id)
     .eq('active', true)
-    .order('position', { ascending: true })
+    .order('position')
 
-  // 3. Check for existing session and answers from cookie (unless ?new=1 is requested)
+  // 3. Resume existing session if cookie is present and ?new=1 is NOT passed
   let existingSessionId: string | null = null
   let existingStatus: string | null = null
+  let existingAnswers: Record<string, any> = {}
   let existingDraftText: string | null = null
-  const existingAnswers: Record<string, any> = {}
 
   if (forceNew !== '1') {
-    const cookie = await getSessionFromCookie()
-    if (cookie && cookie.campaign_id === campaign.id) {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get(`session_${slug}`)
+    if (sessionCookie?.value) {
       const { data: session } = await supabase
         .from('sessions')
         .select('id, status')
-        .eq('id', cookie.session_id)
-        .single()
+        .eq('id', sessionCookie.value)
+        .eq('campaign_id', campaign.id)
+        .maybeSingle()
 
       if (session) {
         existingSessionId = session.id
         existingStatus = session.status
 
-        // Load stored answers if session exists
         const { data: answers } = await supabase
           .from('answers')
           .select('question_key, value')
@@ -104,13 +119,12 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
           }
         }
 
-        // Pre-fetch draft if session is completed to avoid loading spinner
         if (session.status === 'completed') {
           const { data: draftRecord } = await supabase
             .from('review_drafts')
             .select('final_text, original_text')
             .eq('session_id', session.id)
-            .single()
+            .maybeSingle()
 
           if (draftRecord) {
             existingDraftText = draftRecord.final_text || draftRecord.original_text || null
@@ -123,25 +137,27 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
   const restaurantName = business?.name ?? 'Biryani Charminar'
   const welcomeText =
     (business?.welcome_message?.en as string | undefined) ??
-    'Welcome to Biryani Charminar! We would love to hear about your experience today.'
+    'Welcome to Biryani Charminar! Authentic Hyderabadi Dum Biryani, royal kebabs & Mughlai delicacies. Share your honest experience with us in 30 seconds.'
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-amber-50/30 to-stone-100 text-stone-900 flex flex-col justify-between p-4 sm:p-6 selection:bg-amber-600 selection:text-white relative overflow-hidden font-sans">
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-b from-stone-50 via-amber-50/30 to-stone-100 text-stone-900 flex flex-col justify-between px-3 sm:px-6 py-3 sm:py-6 selection:bg-amber-600 selection:text-white relative overflow-x-hidden font-sans">
       {/* Ambient warm gold & saffron glows */}
-      <div className="fixed -top-12 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-200/35 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-80 h-80 bg-yellow-200/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed -top-12 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-amber-200/35 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 right-1/4 w-60 sm:w-80 h-60 sm:h-80 bg-yellow-200/25 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-center pt-2">
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-stone-200/90 shadow-xs backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          <span className="text-[11px] font-bold text-amber-950">Guest Feedback Survey</span>
+      {/* Header Badge */}
+      <header className="relative z-10 flex items-center justify-center pt-1 sm:pt-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/95 border border-stone-200/90 shadow-xs backdrop-blur-md">
+          <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-amber-600 shrink-0" />
+          <span className="text-[10px] sm:text-[11px] font-bold text-amber-950 tracking-wide">
+            Guest Feedback Survey
+          </span>
         </div>
       </header>
 
       {/* Quiz Flow Orchestration */}
       <QuizFlow
-        slug={slug}
+        slug={campaign.slug}
         restaurantName={restaurantName}
         logoUrl={business?.logo_url}
         primaryColor={business?.primary_color}
@@ -154,8 +170,8 @@ export default async function CustomerLandingPage({ params, searchParams }: Prop
         menuItems={menuItems || []}
       />
 
-      {/* Footer */}
-      <footer className="relative z-10 text-center py-3 text-[11px] text-stone-400 flex items-center justify-center gap-1.5">
+      {/* Mobile-Friendly Footer */}
+      <footer className="relative z-10 text-center py-2 sm:py-3 text-[10px] sm:text-[11px] text-stone-400 flex items-center justify-center gap-1.5">
         <span>Powered by</span>
         <span className="font-bold text-stone-700">ReviewPulse</span>
         <span>•</span>

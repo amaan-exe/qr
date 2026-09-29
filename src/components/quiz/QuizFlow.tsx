@@ -249,8 +249,8 @@ export default function QuizFlow({
     return (
       <>
         <OfflineBanner hasSyncError={hasSyncError} onRetry={handleRetry} />
-        <main className="relative z-10 w-full max-w-md mx-auto my-auto py-6">
-          <div className="p-7 sm:p-8 rounded-3xl bg-white border border-stone-200 shadow-[0_20px_60px_-15px_rgba(180,83,9,0.08),0_4px_20px_rgba(0,0,0,0.03)] space-y-6 text-center animate-in fade-in zoom-in-95 duration-300">
+        <main className="relative z-10 w-full max-w-md mx-auto my-auto py-2 sm:py-6">
+          <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-stone-200 shadow-[0_20px_60px_-15px_rgba(180,83,9,0.08),0_4px_20px_rgba(0,0,0,0.03)] space-y-5 sm:space-y-6 text-center animate-in fade-in zoom-in-95 duration-300">
             {/* Crest / Monogram Icon */}
             <div className="relative mx-auto w-20 h-20">
               <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-500 text-white flex items-center justify-center shadow-xl shadow-amber-600/25 overflow-hidden border-2 border-amber-200">
@@ -404,7 +404,7 @@ export default function QuizFlow({
   return (
     <>
       <OfflineBanner hasSyncError={hasSyncError} onRetry={handleRetry} />
-      <div className="relative z-10 w-full max-w-lg mx-auto py-4 sm:py-6 px-4 sm:px-0 flex flex-col justify-between min-h-[580px]">
+      <div className="relative z-10 w-full max-w-lg mx-auto py-2 sm:py-6 px-1 sm:px-0 flex flex-col justify-between min-h-[460px] sm:min-h-[580px]">
         <QuizProgressHeader
           restaurantName={restaurantName}
           logoUrl={logoUrl}
@@ -414,8 +414,8 @@ export default function QuizFlow({
           canGoBack={stepIndex > 0}
         />
 
-        <div className="my-auto py-4 sm:py-6">
-          <div className="relative p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-[0_20px_50px_-15px_rgba(180,83,9,0.08),0_4px_16px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="my-auto py-3 sm:py-6">
+          <div className="relative p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-stone-200/90 shadow-[0_20px_50px_-15px_rgba(180,83,9,0.08),0_4px_16px_rgba(0,0,0,0.03)] overflow-hidden">
             {/* Subtle warm accent glows */}
             <div className="absolute -top-24 -left-24 w-52 h-52 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />

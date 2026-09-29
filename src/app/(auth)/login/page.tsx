@@ -7,13 +7,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, Loader2, LogIn, AlertCircle, Sparkles, Utensils, KeyRound, UserCheck } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn, AlertCircle, Utensils, KeyRound, UserCheck } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  // Hardcoded default credentials for quick and easy access
-  const [email, setEmail] = useState('admin')
-  const [password, setPassword] = useState('password123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -25,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
-      
+
       // Resolve alias 'admin' or 'owner' to the registered Biryani Charminar owner account
       let resolvedEmail = email.trim()
       if (
@@ -52,35 +51,6 @@ export default function LoginPage() {
       router.refresh()
     } catch (err: unknown) {
       const rawMsg = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
-      setError(rawMsg)
-      setLoading(false)
-    }
-  }
-
-  // Quick 1-Click Demo Login for Biryani Charminar Owner
-  const handleQuickDemoLogin = async () => {
-    setEmail('admin')
-    setPassword('password123')
-    setError(null)
-    setLoading(true)
-
-    try {
-      const supabase = createClient()
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: 'invincibleperson9@gmail.com',
-        password: 'password123',
-      })
-
-      if (authError) {
-        setError(authError.message)
-        setLoading(false)
-        return
-      }
-
-      router.push('/dashboard')
-      router.refresh()
-    } catch (err: unknown) {
-      const rawMsg = err instanceof Error ? err.message : 'Login failed'
       setError(rawMsg)
       setLoading(false)
     }
@@ -114,44 +84,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Quick Demo Login Option */}
-          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-amber-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                Quick Owner Demo Login
-              </span>
-              <span className="text-[10px] text-amber-400/80 font-mono">1-Click</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleQuickDemoLogin}
-              disabled={loading}
-              className="w-full h-8 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              Sign in as Biryani Charminar Owner
-            </button>
-          </div>
-
-          {/* Credentials Display Banner */}
-          <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5 text-xs">
-            <div className="flex items-center justify-between text-[11px] font-semibold">
-              <span className="text-slate-400 flex items-center gap-1">
-                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                Hardcoded Credentials
-              </span>
-              <span className="text-emerald-400 font-mono text-[10px]">Pre-filled</span>
-            </div>
-            <div className="flex items-center justify-between font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800/80">
-              <span className="text-slate-400">Username:</span>
-              <span className="text-amber-300 font-bold select-all">admin</span>
-            </div>
-            <div className="flex items-center justify-between font-mono bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800/80">
-              <span className="text-slate-400">Password:</span>
-              <span className="text-amber-300 font-bold select-all">password123</span>
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="username" className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
               <UserCheck className="w-3.5 h-3.5 text-amber-500" />
@@ -160,12 +92,13 @@ export default function LoginPage() {
             <Input
               id="username"
               type="text"
-              placeholder="admin"
+              placeholder="e.g. admin or owner@biryanicharminar.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 rounded-lg font-mono text-sm"
+              autoComplete="username"
+              className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-11 rounded-lg text-sm"
             />
           </div>
 
@@ -180,18 +113,19 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="password123"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-10 pr-10 rounded-lg font-mono text-sm"
+                autoComplete="current-password"
+                className="bg-slate-950/60 border-slate-800 focus:border-amber-500 text-white placeholder:text-slate-500 h-11 pr-10 rounded-lg text-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -203,7 +137,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white font-bold h-10 rounded-lg shadow-lg shadow-amber-600/25 transition-all duration-200 cursor-pointer"
+            className="w-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white font-bold h-11 rounded-lg shadow-lg shadow-amber-600/25 transition-all duration-200 cursor-pointer text-sm"
           >
             {loading ? (
               <>

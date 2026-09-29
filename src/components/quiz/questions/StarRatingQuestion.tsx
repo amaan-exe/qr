@@ -65,7 +65,7 @@ export default function StarRatingQuestion({ value, onChange }: StarRatingQuesti
       <div
         role="radiogroup"
         aria-label="Overall experience rating"
-        className="py-6 flex items-center justify-center gap-2 sm:gap-4"
+        className="py-4 sm:py-6 flex items-center justify-center gap-1.5 sm:gap-3.5"
       >
         {[1, 2, 3, 4, 5].map((star) => {
           const isFilled = star <= activeRating
@@ -83,14 +83,14 @@ export default function StarRatingQuestion({ value, onChange }: StarRatingQuesti
               onMouseEnter={() => setHovered(star)}
               onMouseLeave={() => setHovered(null)}
               aria-label={`Rate ${star} star${star > 1 ? 's' : ''}: ${RATING_LABELS[star]}`}
-              className={`relative min-w-[50px] min-h-[50px] p-2.5 sm:p-3.5 rounded-2xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 active:scale-95 flex items-center justify-center ${
+              className={`relative min-w-[44px] min-h-[44px] sm:min-w-[54px] sm:min-h-[54px] p-2 sm:p-3 rounded-2xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 active:scale-95 flex items-center justify-center shrink-0 ${
                 isSelected
-                  ? 'bg-amber-50 scale-110 shadow-lg shadow-amber-500/15 border border-amber-300'
+                  ? 'bg-amber-50 scale-105 sm:scale-110 shadow-lg shadow-amber-500/15 border border-amber-300'
                   : 'hover:bg-stone-50 hover:scale-105 border border-transparent'
               }`}
             >
               <Star
-                className={`w-9 h-9 sm:w-11 sm:h-11 transition-all duration-200 ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 transition-all duration-200 ${
                   isFilled
                     ? 'text-amber-400 fill-amber-400 drop-shadow-[0_3px_10px_rgba(251,191,36,0.45)]'
                     : 'text-stone-300 fill-transparent hover:text-stone-400'

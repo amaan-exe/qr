@@ -61,7 +61,7 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
       <div
         role="radiogroup"
         aria-label="Food and drink rating"
-        className="py-6 flex items-center justify-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap"
+        className="py-4 sm:py-6 flex items-center justify-center gap-1 sm:gap-3.5 flex-nowrap overflow-x-auto no-scrollbar"
       >
         {EMOJI_OPTIONS.map((opt) => {
           const isSelected = value === opt.rating
@@ -76,17 +76,17 @@ export default function EmojiRatingQuestion({ value, onChange }: EmojiRatingQues
               onClick={() => onChange(opt.rating)}
               onKeyDown={(e) => handleKeyDown(e, opt.rating)}
               aria-label={`${opt.label} (${opt.rating} of 5)`}
-              className={`group flex flex-col items-center justify-center w-16 h-22 sm:w-18 sm:h-24 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+              className={`group flex flex-col items-center justify-center w-[58px] h-20 sm:w-18 sm:h-24 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 shrink-0 ${
                 isSelected
-                  ? 'border-amber-500 bg-amber-50 scale-110 shadow-lg shadow-amber-500/15 ring-2 ring-amber-500/40'
+                  ? 'border-amber-500 bg-amber-50 scale-105 sm:scale-110 shadow-lg shadow-amber-500/15 ring-2 ring-amber-500/40'
                   : 'border-stone-200 bg-stone-50/60 hover:bg-white hover:border-amber-300'
               }`}
             >
-              <span className="text-3xl sm:text-4xl transition-transform group-hover:scale-115 group-active:scale-95 duration-200" aria-hidden="true">
+              <span className="text-2xl sm:text-4xl transition-transform group-hover:scale-115 group-active:scale-95 duration-200" aria-hidden="true">
                 {opt.emoji}
               </span>
               <span
-                className={`text-xs font-semibold mt-2 transition-colors ${
+                className={`text-[10px] sm:text-xs font-semibold mt-1 sm:mt-2 transition-colors truncate px-1 ${
                   isSelected ? 'text-amber-900 font-bold' : 'text-stone-500 group-hover:text-stone-800'
                 }`}
               >

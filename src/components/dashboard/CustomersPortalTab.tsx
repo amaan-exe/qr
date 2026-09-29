@@ -702,12 +702,12 @@ export default function CustomersPortalTab({ customers, restaurantName }: Custom
             </div>
 
             {/* Contact Details Card */}
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
               <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
                 Contact &amp; Messaging Info
               </span>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
                   <span className="text-xs text-slate-400 block">Mobile Number</span>
                   <span className="font-mono text-base font-bold text-emerald-400">
@@ -716,7 +716,7 @@ export default function CustomersPortalTab({ customers, restaurantName }: Custom
                 </div>
 
                 {selectedCustomer.hasPhone && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => handleCopyPhone(selectedCustomer.phone)}

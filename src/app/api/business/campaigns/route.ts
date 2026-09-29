@@ -132,3 +132,51 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) {
+      return NextResponse.json({ error: 'Missing campaign id' }, { status: 400 })
+    }
+
+    const admin = createAdminClient()
+
+    // Verify ownership
+    const { data: campaign } = await admin
+      .from('campaigns')
+      .select('id, business_id, businesses!inner(owner_id)')
+      .eq('id', id)
+      .eq('businesses.owner_id', user.id)
+      .single()
+
+    if (!campaign) {
+      return NextResponse.json({ error: 'Campaign not found or unauthorized' }, { status: 404 })
+    }
+
+    const { error: deleteError } = await admin
+      .from('campaigns')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) {
+      return NextResponse.json({ error: 'Failed to delete campaign' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error) {
+    console.error('Campaign deletion error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+

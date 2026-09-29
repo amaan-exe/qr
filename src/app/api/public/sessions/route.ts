@@ -25,11 +25,25 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient()
 
     // 1. Look up campaign & business
-    const { data: campaign, error: campaignError } = await supabase
+    let { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select('id, active, business_id, businesses(id, name, logo_url, primary_color, welcome_message, google_review_url)')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
+
+    if (!campaign) {
+      const { data: fallbackCampaign } = await supabase
+        .from('campaigns')
+        .select('id, active, business_id, businesses(id, name, logo_url, primary_color, welcome_message, google_review_url)')
+        .eq('active', true)
+        .limit(1)
+        .maybeSingle()
+
+      if (fallbackCampaign) {
+        campaign = fallbackCampaign
+        campaignError = null
+      }
+    }
 
     if (campaignError || !campaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })

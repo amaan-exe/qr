@@ -50,7 +50,7 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Header & Filter Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight">Customer Responses Feed</h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -59,7 +59,7 @@ export default function ResponsesTab({ responses }: ResponsesTabProps) {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs overflow-x-auto no-scrollbar shrink-0">
           <Filter className="w-3.5 h-3.5 text-slate-500 ml-2" />
           <button
             type="button"
