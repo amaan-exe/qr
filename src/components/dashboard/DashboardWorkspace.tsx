@@ -36,6 +36,7 @@ interface DashboardWorkspaceProps {
   feedbackList: any[]
   menuItems: any[]
   customers?: CustomerDetail[]
+  userEmail?: string
 }
 
 type TabType = 'overview' | 'customers' | 'responses' | 'campaigns' | 'feedback' | 'menu' | 'settings'
@@ -51,6 +52,7 @@ export default function DashboardWorkspace({
   feedbackList,
   menuItems,
   customers = [],
+  userEmail = 'admin',
 }: DashboardWorkspaceProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -213,7 +215,9 @@ export default function DashboardWorkspace({
         {activeTab === 'menu' && (
           <MenuTab menuItems={menuItems} onRefresh={handleRefresh} />
         )}
-        {activeTab === 'settings' && <SettingsTab business={business} onRefresh={handleRefresh} />}
+        {activeTab === 'settings' && (
+          <SettingsTab business={business} onRefresh={handleRefresh} userEmail={userEmail} />
+        )}
       </div>
 
       {/* Mobile Bottom Navigation Bar (Docked on phones) */}

@@ -212,10 +212,10 @@ export default function MobileMenuDrawer({
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-200 group-hover:text-white block">
-                  Settings &amp; Branding
+                  Settings &amp; Security
                 </span>
                 <span className="text-[10px] text-slate-400">
-                  Google review link, colors &amp; welcome message
+                  Password, branding &amp; Google review link
                 </span>
               </div>
             </div>

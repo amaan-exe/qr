@@ -369,6 +369,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       customers={customerDetails}
       feedbackList={feedbackList}
       menuItems={menuItems || []}
+      userEmail={user?.email || 'admin'}
     />
   )
 }
